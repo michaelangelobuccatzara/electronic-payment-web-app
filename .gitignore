@@ -1,0 +1,63 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.out/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# OS files
+Thumbs.db
+
+# Testing
+coverage/
+*.lcov
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Next.js / frameworks (if ever used)
+.next/
+.nuxt/
+
+# Storybook
+storybook-static/
+
+# Misc
+*.tgz
+
+# Optional: lockfiles (usually you WANT to commit these)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
