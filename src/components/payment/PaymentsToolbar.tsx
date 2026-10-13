@@ -64,16 +64,6 @@ export function PaymentsToolbar({
             ))}
           </select>
         </div>
-
-        {/* No behavior in the source. */}
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 bg-background hover:bg-surface-container-low px-3 py-2 rounded-lg text-on-surface font-label-md text-label-md transition-colors"
-        >
-          <Icon name="calendar_today" className="text-outline text-body-md" />
-          <span className="font-data-tabular text-data-tabular">This Month (March 2025)</span>
-          <Icon name="expand_more" className="text-outline text-body-sm" />
-        </button>
       </div>
     </div>
   );
