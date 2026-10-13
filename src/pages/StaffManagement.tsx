@@ -7,6 +7,8 @@ import { StaffTable } from "../components/staff/StaffTable";
 import { StaffToolbar } from "../components/staff/StaffToolbar";
 import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
+import { EditStaffModal } from "../components/staff/EditStaffModal";
+import type { NameParts } from "../utils/splitFullName";
 
 const PAGE_SIZE = 6;
 
@@ -15,14 +17,14 @@ interface StaffManagementProps {
   summary: StaffSummary;
 }
 
-export function StaffManagement({
-  staff,
-  summary,
-}: StaffManagementProps) {
+export function StaffManagement({ staff, summary }: StaffManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [staffToRevoke, setStaffToRevoke] = useState<StaffMember | null>(null);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState<StaffMember | null>(null);
 
   // Derived during render: no extra state or effect needed.
   const query = searchQuery.trim().toLowerCase();
@@ -47,6 +49,19 @@ export function StaffManagement({
   const handleSaveStaff = () => closeAddDrawer();
   const handleConfirmRevoke = () => closeRevokeDialog();
 
+  const openEditModal = (member: StaffMember) => {
+    setMemberToEdit(member);
+    setIsEditOpen(true);
+  };
+  const closeEditModal = () => setIsEditOpen(false);
+
+  // Receives the id of the staff member that was edited.
+  const handleUpdate = (staffId: string, names: NameParts) => {
+    // Persisting needs a data source, which isn't decided yet.
+    // This is where `staffId` and `names` go to your update call.
+    closeEditModal();
+  };
+
   return (
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
@@ -61,13 +76,24 @@ export function StaffManagement({
             Staff Management
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Manage authorized school personnel, administrative roles, and system access.
+            Manage authorized school personnel, administrative roles, and system
+            access.
           </p>
         </div>
 
         <div className="flex items-center gap-space-md self-start md:self-auto">
-          <QuickStat label="Total Personnel" value={summary.totalPersonnel} icon="badge" tone="neutral" />
-          <QuickStat label="Active Accounts" value={summary.activeAccounts} icon="verified_user" tone="success" />
+          <QuickStat
+            label="Total Personnel"
+            value={summary.totalPersonnel}
+            icon="badge"
+            tone="neutral"
+          />
+          <QuickStat
+            label="Active Accounts"
+            value={summary.activeAccounts}
+            icon="verified_user"
+            tone="success"
+          />
         </div>
       </div>
 
@@ -79,7 +105,15 @@ export function StaffManagement({
 
       <div className="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col w-full">
         <div className="overflow-x-auto">
-          <StaffTable staff={visibleStaff} onRevoke={setStaffToRevoke} />
+          <StaffTable staff={visibleStaff} onEdit={openEditModal} onRevoke={setStaffToRevoke} />
+
+
+          <EditStaffModal
+            isOpen={isEditOpen}
+            member={memberToEdit}
+            onClose={closeEditModal}
+            onUpdate={handleUpdate}
+          />
         </div>
         <Pagination
           currentPage={currentPage}

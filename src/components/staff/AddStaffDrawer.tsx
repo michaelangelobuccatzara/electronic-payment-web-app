@@ -80,7 +80,6 @@ export function AddStaffDrawer({
   const ids = {
     form: `${baseId}-form`,
     title: `${baseId}-title`,
-    permissions: `${baseId}-permissions`,
     firstName: `${baseId}-first-name`,
     middleName: `${baseId}-middle-name`,
     lastName: `${baseId}-last-name`,

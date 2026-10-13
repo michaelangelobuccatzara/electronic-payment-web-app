@@ -34,9 +34,10 @@ function RowAction({ icon, label, target, hoverClassName, onClick }: RowActionPr
 interface StaffTableProps {
   staff: readonly StaffMember[];
   onRevoke: (member: StaffMember) => void;
+  onEdit: (member: StaffMember) => void;
 }
 
-export function StaffTable({ staff, onRevoke }: StaffTableProps) {
+export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
   return (
     <table className="w-full text-left border-collapse">
       <caption className="sr-only">Staff members</caption>
@@ -96,6 +97,7 @@ export function StaffTable({ staff, onRevoke }: StaffTableProps) {
                       label="Edit Credentials"
                       target={member.fullName}
                       hoverClassName="hover:text-on-surface hover:bg-surface-container"
+                      onClick={() => onEdit(member)}
                     />
                     <RowAction
                       icon="delete"
