@@ -59,21 +59,12 @@ export function PromissoryNotes({
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-xs">
         <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs text-secondary mb-1">
-            <Icon
-              name="assignment_turned_in"
-              className="text-body-md [font-variation-settings:'FILL'_1]"
-            />
-            <span className="font-label-sm text-label-sm tracking-wider uppercase font-semibold">
-              Institutional Bursar • Student Credit Desk
-            </span>
-          </div>
+          <div className="flex items-center gap-space-xs text-secondary mb-1"></div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
             Promissory Notes
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-            Review and process student promissory note requests and examination
-            permit endorsements.
+            Review and process student promissory note requests.
           </p>
         </div>
 
