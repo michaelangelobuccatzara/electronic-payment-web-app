@@ -31,3 +31,39 @@ export interface DashboardSummary {
   pendingPromissoryRequests: number;
   paymentsCollected: number;
 }
+
+export type StaffStatus = "active";
+
+export interface StaffMember {
+  staffId: string;
+  fullName: string;
+  department: string;
+  email: string;
+  status: StaffStatus;
+}
+
+export interface StaffSummary {
+  totalPersonnel: number;
+  activeAccounts: number;
+}
+
+export type StaffRole =
+  | "Finance Officer"
+  | "Registrar"
+  | "Academic Head"
+  | "Head Cashier"
+  | "Billing Specialist"
+  | "IT Administrator";
+
+export type StaffPermissionId =
+  | "view-balances"
+  | "issue-receipts"
+  | "approve-promissory";
+
+export interface NewStaffDraft {
+  fullName: string;
+  email: string;
+  role: StaffRole;
+  temporaryPassword: string;
+  permissions: readonly StaffPermissionId[];
+}

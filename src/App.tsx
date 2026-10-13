@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { StaffManagement } from "./pages/StaffManagement";
 import { NAV_ITEMS, ROUTE_PATHS } from "./data/navigation";
 import {
   SAMPLE_ACADEMIC_CYCLE_LABEL,
@@ -12,6 +13,12 @@ import {
   SAMPLE_SUMMARY,
   SAMPLE_USER,
 } from "./data/dashboardSample";
+import {
+  SAMPLE_CAMPUS_BRANCH,
+  SAMPLE_NEXT_STAFF_ID,
+  SAMPLE_STAFF,
+  SAMPLE_STAFF_SUMMARY,
+} from "./data/staffSample";
 
 function App() {
   return (
@@ -41,11 +48,33 @@ function App() {
                 />
               }
             />
-            <Route path={ROUTE_PATHS.staff} element={<PlaceholderPage title="Staff" />} />
-            <Route path={ROUTE_PATHS.students} element={<PlaceholderPage title="Students" />} />
-            <Route path={ROUTE_PATHS.gradingPeriods} element={<PlaceholderPage title="Grading Periods" />} />
-            <Route path={ROUTE_PATHS.promissoryNotes} element={<PlaceholderPage title="Promissory Notes" />} />
-            <Route path={ROUTE_PATHS.payments} element={<PlaceholderPage title="Payments" />} />
+            <Route
+              path={ROUTE_PATHS.staff}
+              element={
+                <StaffManagement
+                  staff={SAMPLE_STAFF}
+                  summary={SAMPLE_STAFF_SUMMARY}
+                  nextStaffId={SAMPLE_NEXT_STAFF_ID}
+                  campusBranch={SAMPLE_CAMPUS_BRANCH}
+                />
+              }
+            />
+            <Route
+              path={ROUTE_PATHS.students}
+              element={<PlaceholderPage title="Students" />}
+            />
+            <Route
+              path={ROUTE_PATHS.gradingPeriods}
+              element={<PlaceholderPage title="Grading Periods" />}
+            />
+            <Route
+              path={ROUTE_PATHS.promissoryNotes}
+              element={<PlaceholderPage title="Promissory Notes" />}
+            />
+            <Route
+              path={ROUTE_PATHS.payments}
+              element={<PlaceholderPage title="Payments" />}
+            />
           </Route>
         </Routes>
       </Suspense>
