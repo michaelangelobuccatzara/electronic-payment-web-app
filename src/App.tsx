@@ -19,6 +19,8 @@ import {
   SAMPLE_STAFF,
   SAMPLE_STAFF_SUMMARY,
 } from "./data/staffSample";
+import { StudentManagement } from "./pages/StudentManagement";
+import { SAMPLE_STUDENTS } from "./data/studentSample";
 
 function App() {
   return (
@@ -61,7 +63,12 @@ function App() {
             />
             <Route
               path={ROUTE_PATHS.students}
-              element={<PlaceholderPage title="Students" />}
+              element={
+                <StudentManagement
+                  initialStudents={SAMPLE_STUDENTS}
+                  totalStudents={SAMPLE_SUMMARY.totalStudents}
+                />
+              }
             />
             <Route
               path={ROUTE_PATHS.gradingPeriods}

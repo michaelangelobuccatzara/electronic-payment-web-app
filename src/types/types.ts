@@ -1,3 +1,6 @@
+import type { Program, YearLevel } from "../data/studentOptions";
+
+
 export interface UserProfile {
   firstName: string;
   name: string;
@@ -67,3 +70,50 @@ export interface NewStaffDraft {
   temporaryPassword: string;
   permissions: readonly StaffPermissionId[];
 }
+
+export type StudentStatus = "enrolled"; // Only status in the design. Add members when others are designed.
+
+export interface AssessmentLine {
+  label: string;
+  /** Negative for discounts. */
+  amount: number;
+}
+
+export interface StudentTransaction {
+  description: string;
+  reference: string;
+  date: string;
+  amount: number;
+}
+
+/** Billing and family details. Optional because the source only shows them for one sample student. */
+export interface StudentAccountDetails {
+  emergencyContact: string;
+  scholarship: string;
+  enrolledUnits: number;
+  assessment: readonly AssessmentLine[];
+  transactions: readonly StudentTransaction[];
+}
+
+export interface Student {
+  studentNumber: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  program: Program;
+  yearLevel: YearLevel;
+  status: StudentStatus;
+  balance: number;
+  lastModified?: string;
+  details?: StudentAccountDetails;
+}
+
+export type NewStudentDraft = Pick<
+  Student,
+  "studentNumber" | "fullName" | "email" | "program" | "yearLevel"
+>;
+
+export type StudentEdits = Pick<
+  Student,
+  "fullName" | "program" | "yearLevel" | "email" | "phone"
+>;
