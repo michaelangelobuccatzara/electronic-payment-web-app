@@ -1,5 +1,5 @@
 import type { Program, YearLevel } from "../data/studentOptions";
-
+import type { PaymentMethod, PaymentTransactionStatus } from "../data/paymentOptions";
 
 export interface UserProfile {
   firstName: string;
@@ -166,4 +166,22 @@ export interface NewGradingPeriodDraft {
   startDate: string;
   endDate: string;
   activateImmediately: boolean;
+}
+
+export interface PaymentTransaction {
+  referenceNo: string;
+  studentName: string;
+  studentNumber: string;
+  amount: number;
+  /** Display string, e.g. "Mar 03, 2025". */
+  date: string;
+  /** Display string, e.g. "10:14 AM". */
+  time: string;
+  method: PaymentMethod;
+  status: PaymentTransactionStatus;
+}
+
+export interface PaymentsSummary {
+  totalCollected: number;
+  totalTransactions: number;
 }

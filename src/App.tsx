@@ -31,6 +31,11 @@ import {
   SAMPLE_PROMISSORY_NOTES,
   SAMPLE_PROMISSORY_SUMMARY,
 } from "./data/promissorySample";
+import { Payments } from "./pages/Payments";
+import {
+  SAMPLE_PAYMENT_TRANSACTIONS,
+  SAMPLE_PAYMENTS_SUMMARY,
+} from "./data/paymentSample";
 
 function App() {
   return (
@@ -100,7 +105,12 @@ function App() {
             />
             <Route
               path={ROUTE_PATHS.payments}
-              element={<PlaceholderPage title="Payments" />}
+              element={
+                <Payments
+                  transactions={SAMPLE_PAYMENT_TRANSACTIONS}
+                  summary={SAMPLE_PAYMENTS_SUMMARY}
+                />
+              }
             />
           </Route>
         </Routes>
