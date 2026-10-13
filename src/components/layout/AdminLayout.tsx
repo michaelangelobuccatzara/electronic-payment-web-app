@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import type { NavItem } from "../../data/navigation";
 import type { UserProfile } from "../../types/types";
 import { Sidebar } from "./Sidebar";
@@ -18,6 +18,13 @@ export function AdminLayout({
 }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { pathname } = useLocation();
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear the session (token, user data) here once authentication exists.
+    navigate("/login", { replace: true });
+  };
 
   // Derived during render, so no state or effect is needed.
   const sectionLabel =
@@ -49,6 +56,7 @@ export function AdminLayout({
           user={user}
           isSidebarOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen(true)}
+          onLogout={handleLogout}
         />
 
         {isSidebarOpen && (
