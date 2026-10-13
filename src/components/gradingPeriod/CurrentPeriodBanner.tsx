@@ -20,10 +20,6 @@ export function CurrentPeriodBanner({ period }: CurrentPeriodBannerProps) {
           <h2 className="font-title-sm text-title-sm md:text-headline-md text-on-surface font-bold tracking-tight mt-1">
             {period.academicYear} • {period.semester} ({period.milestone})
           </h2>
-          <p className="font-body-sm text-body-sm text-outline mt-0.5">
-            All electronic collections, examination permit validities, and overdue balance
-            surcharges are strictly calibrated to this milestone.
-          </p>
         </div>
       </div>
     </section>

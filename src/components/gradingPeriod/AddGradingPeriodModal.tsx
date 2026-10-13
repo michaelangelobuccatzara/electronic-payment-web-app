@@ -14,13 +14,10 @@ import {
 const INPUT_CLASS =
   "w-full px-3 py-2 rounded-lg bg-surface-container-low text-on-surface text-body-sm focus:outline-hidden";
 
-function createInitialForm(defaultAcademicYear: string): NewGradingPeriodDraft {
+function createInitialForm(): NewGradingPeriodDraft {
   return {
-    academicYear: defaultAcademicYear,
     title: "",
-    startDate: "",
-    endDate: "",
-    activateImmediately: false,
+    chargeDueDate: "",
   };
 }
 
@@ -33,7 +30,6 @@ interface AddGradingPeriodModalProps {
 
 export function AddGradingPeriodModal({
   isOpen,
-  defaultAcademicYear,
   onClose,
   onSave,
 }: AddGradingPeriodModalProps) {
@@ -42,13 +38,11 @@ export function AddGradingPeriodModal({
     title: `${baseId}-title`,
     year: `${baseId}-year`,
     name: `${baseId}-name`,
-    start: `${baseId}-start`,
-    end: `${baseId}-end`,
-    activate: `${baseId}-activate`,
+    chargeDueDate: `${baseId}-start`,
   };
 
   const [form, setForm] = useState<NewGradingPeriodDraft>(() =>
-    createInitialForm(defaultAcademicYear),
+    createInitialForm(),
   );
 
   const update = <K extends keyof NewGradingPeriodDraft>(
@@ -59,14 +53,14 @@ export function AddGradingPeriodModal({
   };
 
   const handleClose = () => {
-    setForm(createInitialForm(defaultAcademicYear));
+    setForm(createInitialForm());
     onClose();
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSave({ ...form, academicYear: form.academicYear.trim(), title: form.title.trim() });
-    setForm(createInitialForm(defaultAcademicYear));
+    onSave({ ...form, title: form.title.trim() });
+    setForm(createInitialForm());
   };
 
   return (
@@ -97,17 +91,6 @@ export function AddGradingPeriodModal({
 
       <form onSubmit={handleSubmit} className="flex flex-col">
         <div className="p-space-lg flex flex-col gap-space-md">
-          <Field htmlFor={ids.year} label="Academic Year">
-            <input
-              id={ids.year}
-              type="text"
-              required
-              value={form.academicYear}
-              onChange={(event) => update("academicYear", event.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-
           <Field htmlFor={ids.name} label="Period / Milestone Title">
             <input
               id={ids.name}
@@ -121,44 +104,18 @@ export function AddGradingPeriodModal({
           </Field>
 
           <div className="grid grid-cols-2 gap-space-sm">
-            <Field htmlFor={ids.start} label="Start Date">
+            <Field htmlFor={ids.chargeDueDate} label="Charge Due Date">
               <input
-                id={ids.start}
+                id={ids.chargeDueDate}
                 type="date"
                 required
-                value={form.startDate}
-                onChange={(event) => update("startDate", event.target.value)}
-                className={INPUT_CLASS}
-              />
-            </Field>
-            <Field htmlFor={ids.end} label="End Date">
-              <input
-                id={ids.end}
-                type="date"
-                required
-                min={form.startDate || undefined}
-                value={form.endDate}
-                onChange={(event) => update("endDate", event.target.value)}
+                value={form.chargeDueDate}
+                onChange={(event) => update("chargeDueDate", event.target.value)}
                 className={INPUT_CLASS}
               />
             </Field>
           </div>
 
-          <div className="flex items-center gap-space-sm p-3 rounded-lg bg-surface-container-low">
-            <input
-              id={ids.activate}
-              type="checkbox"
-              checked={form.activateImmediately}
-              onChange={(event) => update("activateImmediately", event.target.checked)}
-              className="rounded-xs w-4 h-4 accent-primary"
-            />
-            <label
-              htmlFor={ids.activate}
-              className="font-body-sm text-body-sm text-on-surface font-medium cursor-pointer"
-            >
-              Activate immediately as Current Period
-            </label>
-          </div>
         </div>
 
         <div className="p-space-md bg-surface-container-low flex items-center justify-end gap-space-sm">

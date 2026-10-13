@@ -4,7 +4,6 @@ import {
   isAcademicYearFilter,
   type AcademicYearFilter,
 } from "../../data/gradingPeriodOptions";
-import { Icon } from "../ui/Icon";
 
 interface PeriodToolbarProps {
   searchQuery: string;
@@ -25,10 +24,6 @@ export function PeriodToolbar({
     <div className="p-space-md bg-surface-container-lowest flex flex-col md:flex-row md:items-center justify-between gap-space-md">
       <div className="flex items-center gap-space-sm flex-1 max-w-md">
         <div className="relative w-full">
-          <Icon
-            name="search"
-            className="absolute left-3 top-2.5 text-body-md text-outline pointer-events-none"
-          />
           <input
             type="text"
             aria-label="Search grading periods"

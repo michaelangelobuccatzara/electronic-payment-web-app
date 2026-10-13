@@ -55,10 +55,6 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
           <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
             Grading Periods
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mt-0.5">
-            Configure academic years, semester terms, and active grading milestones for automated
-            tuition billing, exam clearance, and payment schedules.
-          </p>
         </div>
         <div className="flex items-center gap-space-sm self-start lg:self-auto">
           <button

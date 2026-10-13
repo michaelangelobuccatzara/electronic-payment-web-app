@@ -153,11 +153,8 @@ export interface GradingPeriodsSummary {
 }
 
 export interface NewGradingPeriodDraft {
-  academicYear: string;
   title: string;
-  startDate: string;
-  endDate: string;
-  activateImmediately: boolean;
+  chargeDueDate: string;
 }
 
 export interface PaymentTransaction {
