@@ -74,12 +74,8 @@ export interface StaffSummary {
 }
 
 export type StaffRole =
-  | "Finance Officer"
-  | "Registrar"
-  | "Academic Head"
-  | "Head Cashier"
-  | "Billing Specialist"
-  | "IT Administrator";
+  | "Cashier"
+  | "Treasurer";
 
 export type StaffPermissionId =
   | "view-balances"
@@ -91,7 +87,6 @@ export interface NewStaffDraft {
   email: string;
   role: StaffRole;
   temporaryPassword: string;
-  permissions: readonly StaffPermissionId[];
 }
 
 export type StudentStatus = "enrolled"; // Only status in the design. Add members when others are designed.

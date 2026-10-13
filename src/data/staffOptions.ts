@@ -6,12 +6,8 @@ export interface StaffRoleOption {
 }
 
 export const STAFF_ROLE_OPTIONS: readonly StaffRoleOption[] = [
-  { value: "Finance Officer", label: "Finance Officer (Full Ledger & Reconciliation)" },
-  { value: "Registrar", label: "Registrar (Student Enrolment Clearance)" },
-  { value: "Academic Head", label: "Academic Head (Curriculum & Clearance)" },
-  { value: "Head Cashier", label: "Head Cashier (POS Terminal Supervision)" },
-  { value: "Billing Specialist", label: "Billing Specialist (Assessment & Promissory)" },
-  { value: "IT Administrator", label: "IT Administrator (System Config & Audits)" },
+  { value: "Cashier", label: "Cashier (Payment Collection & Receipt Issuance)" },
+  { value: "Treasurer", label: "Treasurer (Financial Records & Account Reconciliation)" },
 ];
 
 /** Narrows a raw <select> value, which the DOM types as plain string. */

@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense } from "react";
 import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminDashboard } from "./pages/AdminDashboard";
-import { PlaceholderPage } from "./pages/PlaceholderPage";
 import { StaffManagement } from "./pages/StaffManagement";
 import { NAV_ITEMS, ROUTE_PATHS } from "./data/navigation";
 import {
@@ -13,8 +12,6 @@ import {
   SAMPLE_USER,
 } from "./data/dashboardSample";
 import {
-  SAMPLE_CAMPUS_BRANCH,
-  SAMPLE_NEXT_STAFF_ID,
   SAMPLE_STAFF,
   SAMPLE_STAFF_SUMMARY,
 } from "./data/staffSample";
@@ -69,8 +66,6 @@ function App() {
                 <StaffManagement
                   staff={SAMPLE_STAFF}
                   summary={SAMPLE_STAFF_SUMMARY}
-                  nextStaffId={SAMPLE_NEXT_STAFF_ID}
-                  campusBranch={SAMPLE_CAMPUS_BRANCH}
                 />
               }
             />

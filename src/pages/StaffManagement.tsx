@@ -13,15 +13,11 @@ const PAGE_SIZE = 6;
 interface StaffManagementProps {
   staff: readonly StaffMember[];
   summary: StaffSummary;
-  nextStaffId: string;
-  campusBranch: string;
 }
 
 export function StaffManagement({
   staff,
   summary,
-  nextStaffId,
-  campusBranch,
 }: StaffManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,8 +94,6 @@ export function StaffManagement({
 
       <AddStaffDrawer
         isOpen={isAddDrawerOpen}
-        nextStaffId={nextStaffId}
-        campusBranch={campusBranch}
         onClose={closeAddDrawer}
         onSave={handleSaveStaff}
       />

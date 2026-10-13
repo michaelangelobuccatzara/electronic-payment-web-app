@@ -6,9 +6,6 @@ export const SAMPLE_STAFF_SUMMARY: StaffSummary = {
   activeAccounts: 179,
 };
 
-export const SAMPLE_NEXT_STAFF_ID = "STF-1007";
-export const SAMPLE_CAMPUS_BRANCH = "Main Campus (Marbel)";
-
 export const SAMPLE_STAFF: readonly StaffMember[] = [
   { staffId: "STF-1001", fullName: "Dr. Roberto Gonzales", department: "Office of Registrar", email: "r.gonzales@ndtc.edu.ph", status: "active" },
   { staffId: "STF-1002", fullName: "Maria Santos", department: "Bursar & Treasury", email: "m.santos@ndtc.edu.ph", status: "active" },
