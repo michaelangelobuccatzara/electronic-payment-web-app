@@ -7,7 +7,6 @@ import { StaffManagement } from "./pages/StaffManagement";
 import { NAV_ITEMS, ROUTE_PATHS } from "./data/navigation";
 import {
   SAMPLE_ACADEMIC_CYCLE_LABEL,
-  SAMPLE_DATE_TIME_LABEL,
   SAMPLE_PAYMENTS,
   SAMPLE_PROMISSORY_REQUESTS,
   SAMPLE_SUMMARY,
@@ -49,7 +48,6 @@ function App() {
               <AdminLayout
                 navItems={NAV_ITEMS}
                 user={SAMPLE_USER}
-                dateTimeLabel={SAMPLE_DATE_TIME_LABEL}
                 academicCycleLabel={SAMPLE_ACADEMIC_CYCLE_LABEL}
               />
             }

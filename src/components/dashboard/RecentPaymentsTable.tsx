@@ -25,7 +25,6 @@ export function RecentPaymentsTable({ payments }: RecentPaymentsTableProps) {
           <th scope="col" className={HEADER_CELL}>Year Level</th>
           <th scope="col" className={`${HEADER_CELL} text-right`}>Amount</th>
           <th scope="col" className={HEADER_CELL}>Date</th>
-          <th scope="col" className={`${HEADER_CELL} text-center`}>Status</th>
         </tr>
       </thead>
       <tbody className="divide-y-0 text-on-surface">
@@ -50,9 +49,6 @@ export function RecentPaymentsTable({ payments }: RecentPaymentsTableProps) {
               </td>
               <td className={`${CELL} font-body-sm text-body-sm text-outline`}>
                 {payment.date}
-              </td>
-              <td className={`${CELL} text-center`}>
-                <StatusBadge tone={badge.tone} label={badge.label} />
               </td>
             </tr>
           );

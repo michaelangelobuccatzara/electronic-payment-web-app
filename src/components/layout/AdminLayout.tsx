@@ -8,14 +8,12 @@ import { TopNavBar } from "./TopNavBar";
 interface AdminLayoutProps {
   navItems: readonly NavItem[];
   user: UserProfile;
-  dateTimeLabel: string;
   academicCycleLabel: string;
 }
 
 export function AdminLayout({
   navItems,
   user,
-  dateTimeLabel,
   academicCycleLabel,
 }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -48,7 +46,6 @@ export function AdminLayout({
       <div className="lg:pl-64">
         <TopNavBar
           sectionLabel={sectionLabel}
-          dateTimeLabel={dateTimeLabel}
           user={user}
           isSidebarOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen(true)}

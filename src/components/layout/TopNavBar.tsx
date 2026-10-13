@@ -1,9 +1,9 @@
 import type { UserProfile } from "../../types/types";
 import { Icon } from "../ui/Icon";
+import { LiveClock } from "./LiveClock";
 
 interface TopNavBarProps {
   sectionLabel: string;
-  dateTimeLabel: string;
   user: UserProfile;
   isSidebarOpen: boolean;
   onMenuClick: () => void;
@@ -11,7 +11,6 @@ interface TopNavBarProps {
 
 export function TopNavBar({
   sectionLabel,
-  dateTimeLabel,
   user,
   isSidebarOpen,
   onMenuClick,
@@ -53,9 +52,7 @@ export function TopNavBar({
       <div className="flex items-center gap-space-lg">
         <div className="hidden md:flex items-center gap-space-xs text-on-surface-variant border-r border-outline-variant pr-space-lg">
           <Icon name="schedule" className="text-body-md text-outline" />
-          <span className="font-data-tabular text-data-tabular text-on-surface">
-            {dateTimeLabel}
-          </span>
+          <LiveClock />
         </div>
 
         <div className="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant">

@@ -12,7 +12,6 @@ export const SAMPLE_USER: UserProfile = {
   role: "Finance Officer",
 };
 
-export const SAMPLE_DATE_TIME_LABEL = "Oct 24, 2024 • 09:41 AM";
 export const SAMPLE_ACADEMIC_CYCLE_LABEL = "AY 2024–2025 • 2nd Semester";
 
 export const SAMPLE_SUMMARY: DashboardSummary = {
