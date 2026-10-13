@@ -87,12 +87,6 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
                 <td className={`${CELL} text-right`}>
                   <div className="inline-flex items-center gap-1">
                     <RowAction
-                      icon="visibility"
-                      label="View Personnel Profile"
-                      target={member.fullName}
-                      hoverClassName="hover:text-primary hover:bg-surface-container"
-                    />
-                    <RowAction
                       icon="edit"
                       label="Edit Credentials"
                       target={member.fullName}
