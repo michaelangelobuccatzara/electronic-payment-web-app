@@ -117,3 +117,30 @@ export type StudentEdits = Pick<
   Student,
   "fullName" | "program" | "yearLevel" | "email" | "phone"
 >;
+
+export type GradingPeriodStatus = "past" | "current" | "upcoming";
+
+export interface GradingPeriod {
+  id: string;
+  academicYear: string;
+  /** e.g. "2nd Semester" */
+  semester: string;
+  /** e.g. "Midterms" */
+  milestone: string;
+  /** Display string, e.g. "Feb 10, 2025". */
+  dueDate: string;
+  status: GradingPeriodStatus;
+}
+
+export interface GradingPeriodsSummary {
+  configuredTerms: number;
+  coverageLabel: string;
+}
+
+export interface NewGradingPeriodDraft {
+  academicYear: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  activateImmediately: boolean;
+}

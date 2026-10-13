@@ -21,6 +21,11 @@ import {
 } from "./data/staffSample";
 import { StudentManagement } from "./pages/StudentManagement";
 import { SAMPLE_STUDENTS } from "./data/studentSample";
+import { GradingPeriods } from "./pages/GradingPeriods";
+import {
+  SAMPLE_GRADING_PERIODS,
+  SAMPLE_GRADING_SUMMARY,
+} from "./data/gradingPeriodSample";
 
 function App() {
   return (
@@ -72,7 +77,12 @@ function App() {
             />
             <Route
               path={ROUTE_PATHS.gradingPeriods}
-              element={<PlaceholderPage title="Grading Periods" />}
+              element={
+                <GradingPeriods
+                  periods={SAMPLE_GRADING_PERIODS}
+                  summary={SAMPLE_GRADING_SUMMARY}
+                />
+              }
             />
             <Route
               path={ROUTE_PATHS.promissoryNotes}

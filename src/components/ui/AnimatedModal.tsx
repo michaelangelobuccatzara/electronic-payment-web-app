@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
 
+// Defaults match the Students dialogs. Other screens can override them.
+const DEFAULT_OVERLAY = "backdrop-blur-[2px] p-space-md duration-200";
+const DEFAULT_BOX = "rounded-2xl shadow-2xl p-space-xl gap-space-md duration-200";
+
 interface AnimatedModalProps {
   isOpen: boolean;
   onEscape: () => void;
@@ -9,6 +13,8 @@ interface AnimatedModalProps {
   role?: "dialog" | "alertdialog";
   /** Tailwind max-width class for the dialog box, e.g. "max-w-md". */
   maxWidthClassName: string;
+  overlayClassName?: string;
+  boxClassName?: string;
   children: ReactNode;
 }
 
@@ -23,6 +29,8 @@ export function AnimatedModal({
   describedBy,
   role = "dialog",
   maxWidthClassName,
+  overlayClassName = DEFAULT_OVERLAY,
+  boxClassName = DEFAULT_BOX,
   children,
 }: AnimatedModalProps) {
   useEscapeKey(isOpen, onEscape);
@@ -30,7 +38,7 @@ export function AnimatedModal({
   return (
     <div
       inert={!isOpen}
-      className={`fixed inset-0 bg-inverse-surface/40 backdrop-blur-[2px] z-50 flex items-center justify-center p-space-md transition-opacity duration-200 ${
+      className={`fixed inset-0 bg-inverse-surface/40 z-50 flex items-center justify-center transition-opacity ${overlayClassName} ${
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
     >
@@ -39,7 +47,7 @@ export function AnimatedModal({
         aria-modal="true"
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
-        className={`bg-surface-container-lowest w-full rounded-2xl shadow-2xl p-space-xl flex flex-col gap-space-md transition-transform duration-200 ${maxWidthClassName} ${
+        className={`bg-surface-container-lowest w-full flex flex-col transition-transform ${boxClassName} ${maxWidthClassName} ${
           isOpen ? "scale-100" : "scale-95"
         }`}
       >
