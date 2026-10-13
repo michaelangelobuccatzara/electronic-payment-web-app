@@ -27,12 +27,11 @@ function RowAction({ icon, label, target, hoverClassName, onClick }: RowActionPr
 
 interface StudentTableProps {
   students: readonly Student[];
-  onView: (student: Student) => void;
   onEdit: (student: Student) => void;
   onDelete: (student: Student) => void;
 }
 
-export function StudentTable({ students, onView, onEdit, onDelete }: StudentTableProps) {
+export function StudentTable({ students, onEdit, onDelete }: StudentTableProps) {
   return (
     <table className="w-full text-left border-collapse">
       <caption className="sr-only">Students</caption>
@@ -74,13 +73,6 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
               </td>
               <td className="py-3.5 px-space-lg text-right">
                 <div className="inline-flex items-center gap-1">
-                  <RowAction
-                    icon="visibility"
-                    label="View details"
-                    target={student.fullName}
-                    hoverClassName="hover:bg-surface-container hover:text-on-surface"
-                    onClick={() => onView(student)}
-                  />
                   <RowAction
                     icon="edit"
                     label="Edit student"

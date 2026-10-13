@@ -3,11 +3,11 @@ import type { YearFilter } from "../data/studentOptions";
 import type { NewStudentDraft, Student, StudentEdits } from "../types/types";
 import { AddStudentModal } from "../components/student/AddStudentModal";
 import { DeleteStudentModal } from "../components/student/DeleteStudentModal";
-import { StudentDrawer, type DrawerTab } from "../components/student/StudentDrawer";
 import { StudentTable } from "../components/student/StudentTable";
 import { StudentToolbar } from "../components/student/StudentToolbar";
 import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
+import { EditStudentModal } from "../components/student/EditStudentModal";
 
 const PAGE_SIZE = 6;
 
@@ -17,7 +17,10 @@ interface StudentManagementProps {
   totalStudents: number;
 }
 
-export function StudentManagement({ initialStudents, totalStudents }: StudentManagementProps) {
+export function StudentManagement({
+  initialStudents,
+  totalStudents,
+}: StudentManagementProps) {
   const [students, setStudents] = useState<readonly Student[]>(initialStudents);
   const [searchQuery, setSearchQuery] = useState("");
   const [yearFilter, setYearFilter] = useState<YearFilter>("all");
@@ -25,12 +28,14 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
 
   // The "active" and "target" numbers stay set after closing, so the dialogs keep their content
   // while they animate out. The `isOpen` flags control visibility.
-  const [activeNumber, setActiveNumber] = useState<string | null>(null);
-  const [drawerTab, setDrawerTab] = useState<DrawerTab>("overview");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [deleteTargetNumber, setDeleteTargetNumber] = useState<string | null>(null);
+  const [deleteTargetNumber, setDeleteTargetNumber] = useState<string | null>(
+    null,
+  );
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const [editNumber, setEditNumber] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   // Derived during render: no extra state or effects.
   const query = searchQuery.trim().toLowerCase();
@@ -39,21 +44,16 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
       query === "" ||
       student.studentId.toLowerCase().includes(query) ||
       student.fullName.toLowerCase().includes(query);
-    const matchesYear = yearFilter === "all" || student.yearLevel === yearFilter;
+    const matchesYear =
+      yearFilter === "all" || student.yearLevel === yearFilter;
     return matchesSearch && matchesYear;
   });
-  const activeStudent =
-    students.find((student) => student.studentId === activeNumber) ?? null;
+  const editStudent =
+    students.find((student) => student.studentId === editNumber) ?? null;
 
   const totalPages = Math.ceil(totalStudents / PAGE_SIZE);
   const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalStudents);
-
-  const openDrawer = (student: Student, tab: DrawerTab) => {
-    setActiveNumber(student.studentId);
-    setDrawerTab(tab);
-    setIsDrawerOpen(true);
-  };
 
   const requestDelete = (student: Student) => {
     setDeleteTargetNumber(student.studentId);
@@ -68,21 +68,30 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
   };
 
   const addStudent = (draft: NewStudentDraft) => {
-    const newStudent: Student = { ...draft, phone: "", status: "enrolled", balance: 0 };
+    const newStudent: Student = {
+      ...draft,
+      status: "enrolled",
+      balance: 0,
+    };
     setStudents((previous) => [newStudent, ...previous]);
     setIsAddOpen(false);
   };
-
-  const saveStudent = (edits: StudentEdits) => {
-    if (activeNumber === null) return;
-    setStudents((previous) =>
-      previous.map((student) =>
-        student.studentId === activeNumber ? { ...student, ...edits } : student,
-      ),
-    );
-    setDrawerTab("overview");
+  const openEditModal = (student: Student) => {
+    setEditNumber(student.studentId);
+    setIsEditOpen(true);
   };
 
+  // Receives the student number (the record's id) and the edited values.
+  const handleUpdate = (studentNumber: string, edits: StudentEdits) => {
+    setStudents((previous) =>
+      previous.map((student) =>
+        student.studentId === studentNumber
+          ? { ...student, ...edits }
+          : student,
+      ),
+    );
+    setIsEditOpen(false);
+  };
   return (
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
@@ -94,7 +103,8 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
             Student Management
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            View student enrollment records, course assignments, and account balances.
+            View student enrollment records, course assignments, and account
+            balances.
           </p>
         </div>
         <div className="flex items-center gap-space-sm self-start md:self-auto">
@@ -104,8 +114,7 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
             aria-haspopup="dialog"
             className="px-space-md py-space-sm bg-primary-container text-on-primary font-title-sm text-body-sm font-semibold rounded-lg shadow-xs hover:bg-primary transition-colors flex items-center gap-1.5"
           >
-            <Icon name="person_add" className="text-body-lg" />
-            + Add Student
+            <Icon name="person_add" className="text-body-lg" />+ Add Student
           </button>
         </div>
       </div>
@@ -121,8 +130,7 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
         <div className="overflow-x-auto w-full">
           <StudentTable
             students={visibleStudents}
-            onView={(student) => openDrawer(student, "overview")}
-            onEdit={(student) => openDrawer(student, "edit")}
+            onEdit={openEditModal}
             onDelete={requestDelete}
           />
         </div>
@@ -138,13 +146,11 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
         />
       </div>
 
-      <StudentDrawer
-        student={activeStudent}
-        isOpen={isDrawerOpen}
-        tab={drawerTab}
-        onTabChange={setDrawerTab}
-        onClose={() => setIsDrawerOpen(false)}
-        onSave={saveStudent}
+      <EditStudentModal
+        isOpen={isEditOpen}
+        student={editStudent}
+        onClose={() => setIsEditOpen(false)}
+        onUpdate={handleUpdate}
       />
 
       <AddStudentModal

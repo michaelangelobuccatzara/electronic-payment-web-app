@@ -117,7 +117,6 @@ export interface Student {
   studentId: string;
   fullName: string;
   email: string;
-  phone: string;
   yearLevel: YearLevel;
   status: StudentStatus;
   balance: number;
@@ -131,7 +130,7 @@ export type NewStudentDraft = Pick<
 
 export type StudentEdits = Pick<
   Student,
-  "fullName" | "yearLevel" | "email" | "phone"
+  "fullName" | "yearLevel" | "email"
 >;
 
 export type GradingPeriodStatus = "past" | "current" | "upcoming";
