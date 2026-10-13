@@ -45,9 +45,10 @@ const DELETE_BUTTON =
 
 interface PeriodTableProps {
   periods: readonly GradingPeriod[];
+  onEdit: (period: GradingPeriod) => void;
 }
 
-export function PeriodTable({ periods }: PeriodTableProps) {
+export function PeriodTable({ periods, onEdit }: PeriodTableProps) {
   return (
     <table className="w-full text-left border-collapse">
       <caption className="sr-only">Grading periods</caption>
@@ -93,7 +94,7 @@ export function PeriodTable({ periods }: PeriodTableProps) {
                   <div className="flex items-center gap-space-sm">
                     <span
                       aria-hidden="true"
-                      className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`}
+                      className={`w-2 h-2 rounded-full shrink-0`}
                     />
                     <div className="flex flex-col min-w-0">
                       <span
@@ -117,10 +118,10 @@ export function PeriodTable({ periods }: PeriodTableProps) {
                 </td>
                 <td className="py-3 px-space-lg text-right">
                   <div className="inline-flex items-center gap-space-xs">
-                    {/* No behavior in the source for any of these. */}
                     <button
                       type="button"
                       aria-label={`Edit ${name}`}
+                      onClick={() => onEdit(period)}
                       className={EDIT_BUTTON}
                     >
                       Edit

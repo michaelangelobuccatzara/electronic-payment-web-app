@@ -12,6 +12,8 @@ import { PeriodToolbar } from "../components/gradingPeriod/PeriodToolbar";
 import { PRIMARY_BUTTON_CLASS } from "../components/gradingPeriod/periodStyles";
 import { TermsStatCard } from "../components/gradingPeriod/TermsStatCard";
 import { Icon } from "../components/ui/Icon";
+import { EditGradingPeriodModal } from "../components/gradingPeriod/EditGradingPeriodModal";
+import type { NewGradingPeriodDraft } from "../types/types";
 
 interface GradingPeriodsProps {
   periods: readonly GradingPeriod[];
@@ -20,13 +22,22 @@ interface GradingPeriodsProps {
 
 export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [yearFilter, setYearFilter] = useState<AcademicYearFilter>(DEFAULT_ACADEMIC_YEAR_FILTER);
+  const [yearFilter, setYearFilter] = useState<AcademicYearFilter>(
+    DEFAULT_ACADEMIC_YEAR_FILTER,
+  );
   const [isAddOpen, setIsAddOpen] = useState(false);
 
+  // The id stays set after closing so the modal keeps its content while it fades out.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   // Derived during render: no extra state or effects.
-  const currentPeriod = periods.find((period) => period.status === "current") ?? null;
+  const currentPeriod =
+    periods.find((period) => period.status === "current") ?? null;
   const yearScoped =
-    yearFilter === "all" ? periods : periods.filter((period) => period.academicYear === yearFilter);
+    yearFilter === "all"
+      ? periods
+      : periods.filter((period) => period.academicYear === yearFilter);
   const query = searchQuery.trim().toLowerCase();
   const visiblePeriods =
     query === ""
@@ -41,6 +52,22 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
   // Persisting a new period needs a data source, which isn't decided yet.
   const handleSavePeriod = () => closeAddModal();
 
+  const editPeriod = periods.find((period) => period.id === editId) ?? null;
+
+  const openEditModal = (period: GradingPeriod) => {
+    setEditId(period.id);
+    setIsEditOpen(true);
+  };
+  const closeEditModal = () => setIsEditOpen(false);
+
+  // Receives the id of the period that was edited.
+  const handleUpdate = (periodId: string, edits: NewGradingPeriodDraft) => {
+    // Persisting needs a data source, which isn't decided yet.
+    // This is where `periodId` and `edits` go to your update call.
+    console.log("Update grading period", periodId, edits);
+    closeEditModal();
+  };
+
   return (
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
@@ -49,8 +76,13 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">
               Academic Schedule Governance
             </span>
-            <span aria-hidden="true" className="w-1 h-1 rounded-full bg-outline" />
-            <span className="font-label-sm text-label-sm text-outline">Institutional Configuration</span>
+            <span
+              aria-hidden="true"
+              className="w-1 h-1 rounded-full bg-outline"
+            />
+            <span className="font-label-sm text-label-sm text-outline">
+              Institutional Configuration
+            </span>
           </div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
             Grading Periods
@@ -87,13 +119,20 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
           onYearFilterChange={setYearFilter}
         />
         <div className="overflow-x-auto w-full">
-          <PeriodTable periods={visiblePeriods} />
+          <PeriodTable periods={visiblePeriods} onEdit={openEditModal} />
+          <EditGradingPeriodModal
+            isOpen={isEditOpen}
+            period={editPeriod}
+            onClose={closeEditModal}
+            onUpdate={handleUpdate}
+          />
         </div>
         <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
           <div className="flex items-center gap-space-xs">
             <Icon name="info" className="text-body-md text-outline" />
             <p>
-              Showing {visiblePeriods.length} of {yearScoped.length} registered grading windows
+              Showing {visiblePeriods.length} of {yearScoped.length} registered
+              grading windows
               {yearFilter !== "all" && ` for ${yearFilter}`}
             </p>
           </div>
