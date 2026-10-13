@@ -75,7 +75,7 @@ export function StudentDrawer({
                 <div className="flex flex-col">
                   <div className="flex items-center gap-space-xs">
                     <span className="font-data-tabular text-data-tabular font-bold text-primary">
-                      {student.studentNumber}
+                      {student.studentId}
                     </span>
                     <StatusBadge
                       tone="success"

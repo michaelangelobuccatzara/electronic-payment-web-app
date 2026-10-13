@@ -37,32 +37,32 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
   const visibleStudents = students.filter((student) => {
     const matchesSearch =
       query === "" ||
-      student.studentNumber.toLowerCase().includes(query) ||
+      student.studentId.toLowerCase().includes(query) ||
       student.fullName.toLowerCase().includes(query);
     const matchesYear = yearFilter === "all" || student.yearLevel === yearFilter;
     return matchesSearch && matchesYear;
   });
   const activeStudent =
-    students.find((student) => student.studentNumber === activeNumber) ?? null;
+    students.find((student) => student.studentId === activeNumber) ?? null;
 
   const totalPages = Math.ceil(totalStudents / PAGE_SIZE);
   const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalStudents);
 
   const openDrawer = (student: Student, tab: DrawerTab) => {
-    setActiveNumber(student.studentNumber);
+    setActiveNumber(student.studentId);
     setDrawerTab(tab);
     setIsDrawerOpen(true);
   };
 
   const requestDelete = (student: Student) => {
-    setDeleteTargetNumber(student.studentNumber);
+    setDeleteTargetNumber(student.studentId);
     setIsDeleteOpen(true);
   };
 
   const confirmDelete = () => {
     setStudents((previous) =>
-      previous.filter((student) => student.studentNumber !== deleteTargetNumber),
+      previous.filter((student) => student.studentId !== deleteTargetNumber),
     );
     setIsDeleteOpen(false);
   };
@@ -77,16 +77,11 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
     if (activeNumber === null) return;
     setStudents((previous) =>
       previous.map((student) =>
-        student.studentNumber === activeNumber ? { ...student, ...edits } : student,
+        student.studentId === activeNumber ? { ...student, ...edits } : student,
       ),
     );
     setDrawerTab("overview");
   };
-
-  const isStudentNumberTaken = (studentNumber: string) =>
-    students.some(
-      (student) => student.studentNumber.toLowerCase() === studentNumber.toLowerCase(),
-    );
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -154,7 +149,6 @@ export function StudentManagement({ initialStudents, totalStudents }: StudentMan
 
       <AddStudentModal
         isOpen={isAddOpen}
-        isStudentNumberTaken={isStudentNumberTaken}
         onClose={() => setIsAddOpen(false)}
         onAdd={addStudent}
       />

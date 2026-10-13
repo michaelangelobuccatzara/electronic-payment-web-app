@@ -23,7 +23,7 @@ export function StudentToolbar({
           aria-label="Search students"
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search by student number or name..."
+          placeholder="Search by student id or name..."
           className="w-full bg-transparent px-space-sm py-1 font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-hidden"
         />
       </div>

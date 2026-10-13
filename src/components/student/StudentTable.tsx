@@ -38,7 +38,7 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
       <caption className="sr-only">Students</caption>
       <thead>
         <tr className="bg-surface-container-low text-outline font-label-sm text-label-sm uppercase tracking-wider">
-          <th scope="col" className="py-3 px-space-lg font-semibold">Student Number</th>
+          <th scope="col" className="py-3 px-space-lg font-semibold">Student ID</th>
           <th scope="col" className="py-3 px-space-md font-semibold">Full Name</th>
           <th scope="col" className="py-3 px-space-md font-semibold">Year Level</th>
           <th scope="col" className="py-3 px-space-md text-center font-semibold">Status</th>
@@ -55,11 +55,11 @@ export function StudentTable({ students, onView, onEdit, onDelete }: StudentTabl
         ) : (
           students.map((student) => (
             <tr
-              key={student.studentNumber}
+              key={student.studentId}
               className="hover:bg-surface-container-low/60 transition-colors"
             >
               <td className="py-3.5 px-space-lg font-data-tabular text-data-tabular font-semibold text-primary">
-                {student.studentNumber}
+                {student.studentId}
               </td>
               <td className="py-3.5 px-space-md">
                 {/* ml-2 is a leftover from the avatar the source removed; delete it to align with the header. */}

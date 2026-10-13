@@ -1,8 +1,6 @@
 import { useId, useState, type FormEvent } from "react";
 import {
-  isProgram,
   isYearLevel,
-  PROGRAMS,
   YEAR_LEVELS,
 } from "../../data/studentOptions";
 import type { Student, StudentEdits } from "../../types/types";
@@ -22,7 +20,6 @@ export function EditStudentForm({ student, onSave, onCancel }: EditStudentFormPr
   const baseId = useId();
   const [form, setForm] = useState<StudentEdits>(() => ({
     fullName: student.fullName,
-    program: student.program,
     yearLevel: student.yearLevel,
     email: student.email,
     phone: student.phone,
@@ -56,15 +53,6 @@ export function EditStudentForm({ student, onSave, onCancel }: EditStudentFormPr
       </Field>
 
       <div className="grid grid-cols-2 gap-space-md">
-        <Field htmlFor={`${baseId}-program`} label="Program">
-          <OptionSelect
-            id={`${baseId}-program`}
-            value={form.program}
-            options={PROGRAMS}
-            isOption={isProgram}
-            onChange={(program) => update("program", program)}
-          />
-        </Field>
         <Field htmlFor={`${baseId}-year`} label="Year Level">
           <OptionSelect
             id={`${baseId}-year`}

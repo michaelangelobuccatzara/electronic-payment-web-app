@@ -1,4 +1,4 @@
-import type { Program, YearLevel } from "../data/studentOptions";
+import type { YearLevel } from "../data/studentOptions";
 import type { PaymentMethod, PaymentTransactionStatus } from "../data/paymentOptions";
 
 export interface UserProfile {
@@ -114,11 +114,10 @@ export interface StudentAccountDetails {
 }
 
 export interface Student {
-  studentNumber: string;
+  studentId: string;
   fullName: string;
   email: string;
   phone: string;
-  program: Program;
   yearLevel: YearLevel;
   status: StudentStatus;
   balance: number;
@@ -127,13 +126,12 @@ export interface Student {
 }
 
 export type NewStudentDraft = Pick<
-  Student,
-  "studentNumber" | "fullName" | "email" | "program" | "yearLevel"
+  Student, "fullName" | "email" | "yearLevel" | "studentId"
 >;
 
 export type StudentEdits = Pick<
   Student,
-  "fullName" | "program" | "yearLevel" | "email" | "phone"
+  "fullName" | "yearLevel" | "email" | "phone"
 >;
 
 export type GradingPeriodStatus = "past" | "current" | "upcoming";

@@ -1,60 +1,65 @@
 import { useId, useState, type FormEvent } from "react";
 import {
-  isProgram,
   isYearLevel,
-  PROGRAMS,
   YEAR_LEVELS,
+  type YearLevel,
 } from "../../data/studentOptions";
 import type { NewStudentDraft } from "../../types/types";
 import { AnimatedModal } from "../ui/AnimatedModal";
 import { Icon } from "../ui/Icon";
-import { CONTROL_CLASS, Field, OptionSelect, SECONDARY_BUTTON_CLASS } from "./StudentFormControls";
+import {
+  CONTROL_CLASS,
+  Field,
+  OptionSelect,
+  SECONDARY_BUTTON_CLASS,
+} from "./StudentFormControls";
 
-function createInitialForm(): NewStudentDraft {
+interface FormState {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  email: string;
+  yearLevel: YearLevel;
+}
+
+function createInitialForm(): FormState {
   return {
-    studentNumber: "",
-    fullName: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     email: "",
-    program: PROGRAMS[0],
     yearLevel: YEAR_LEVELS[0],
   };
 }
 
 interface AddStudentModalProps {
   isOpen: boolean;
-  isStudentNumberTaken: (studentNumber: string) => boolean;
   onClose: () => void;
   onAdd: (draft: NewStudentDraft) => void;
 }
 
 export function AddStudentModal({
   isOpen,
-  isStudentNumberTaken,
   onClose,
   onAdd,
 }: AddStudentModalProps) {
   const baseId = useId();
   const ids = {
     title: `${baseId}-title`,
-    number: `${baseId}-number`,
-    numberError: `${baseId}-number-error`,
-    name: `${baseId}-name`,
-    program: `${baseId}-program`,
+    firstName: `${baseId}-first-name`,
+    middleName: `${baseId}-middle-name`,
+    lastName: `${baseId}-last-name`,
     year: `${baseId}-year`,
     email: `${baseId}-email`,
   };
 
-  const [form, setForm] = useState<NewStudentDraft>(createInitialForm);
-  const [numberError, setNumberError] = useState<string | null>(null);
+  const [form, setForm] = useState<FormState>(createInitialForm);
 
-  const update = <K extends keyof NewStudentDraft>(key: K, value: NewStudentDraft[K]) => {
+  const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((previous) => ({ ...previous, [key]: value }));
   };
 
-  const reset = () => {
-    setForm(createInitialForm());
-    setNumberError(null);
-  };
+  const reset = () => setForm(createInitialForm());
 
   const handleClose = () => {
     reset();
@@ -63,18 +68,16 @@ export function AddStudentModal({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const studentNumber = form.studentNumber.trim();
 
-    if (isStudentNumberTaken(studentNumber)) {
-      setNumberError("A student with this number already exists.");
-      return;
-    }
+    const fullName = [form.firstName, form.middleName, form.lastName]
+      .map((part) => part.trim())
+      .filter((part) => part !== "")
+      .join(" ");
 
     onAdd({
-      ...form,
-      studentNumber,
-      fullName: form.fullName.trim(),
+      fullName,
       email: form.email.trim(),
+      yearLevel: form.yearLevel,
     });
     reset();
   };
@@ -88,7 +91,10 @@ export function AddStudentModal({
     >
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <h3 id={ids.title} className="font-headline-md text-headline-md font-bold text-on-surface">
+          <h3
+            id={ids.title}
+            className="font-headline-md text-headline-md font-bold text-on-surface"
+          >
             Enroll New Student
           </h3>
           <p className="font-body-sm text-body-sm text-outline">
@@ -105,52 +111,49 @@ export function AddStudentModal({
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-space-md mt-space-xs">
-        <div className="grid grid-cols-2 gap-space-md">
-          <Field htmlFor={ids.number} label="Student Number">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-space-md mt-space-xs"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+          <Field htmlFor={ids.firstName} label="First Name">
             <input
-              id={ids.number}
+              id={ids.firstName}
               type="text"
               required
-              value={form.studentNumber}
-              onChange={(event) => {
-                update("studentNumber", event.target.value);
-                setNumberError(null);
-              }}
-              placeholder="2024-XXXXX"
-              aria-invalid={numberError !== null}
-              aria-describedby={numberError ? ids.numberError : undefined}
-              className={`${CONTROL_CLASS} font-data-tabular`}
+              autoComplete="given-name"
+              value={form.firstName}
+              onChange={(event) => update("firstName", event.target.value)}
+              placeholder="Juan"
+              className={CONTROL_CLASS}
             />
-            {numberError && (
-              <p id={ids.numberError} role="alert" className="font-body-sm text-body-sm text-error">
-                {numberError}
-              </p>
-            )}
           </Field>
-          <Field htmlFor={ids.name} label="Full Name">
+          <Field htmlFor={ids.middleName} label="Middle Name">
             <input
-              id={ids.name}
+              id={ids.middleName}
+              type="text"
+              autoComplete="additional-name"
+              value={form.middleName}
+              onChange={(event) => update("middleName", event.target.value)}
+              placeholder="Santos"
+              className={CONTROL_CLASS}
+            />
+          </Field>
+          <Field htmlFor={ids.lastName} label="Last Name">
+            <input
+              id={ids.lastName}
               type="text"
               required
-              value={form.fullName}
-              onChange={(event) => update("fullName", event.target.value)}
-              placeholder="Juan Dela Cruz"
+              autoComplete="family-name"
+              value={form.lastName}
+              onChange={(event) => update("lastName", event.target.value)}
+              placeholder="Dela Cruz"
               className={CONTROL_CLASS}
             />
           </Field>
         </div>
 
         <div className="grid grid-cols-2 gap-space-md">
-          <Field htmlFor={ids.program} label="Program">
-            <OptionSelect
-              id={ids.program}
-              value={form.program}
-              options={PROGRAMS}
-              isOption={isProgram}
-              onChange={(program) => update("program", program)}
-            />
-          </Field>
           <Field htmlFor={ids.year} label="Year Level">
             <OptionSelect
               id={ids.year}
@@ -175,7 +178,11 @@ export function AddStudentModal({
         </Field>
 
         <div className="flex items-center justify-end gap-space-sm pt-space-sm">
-          <button type="button" onClick={handleClose} className={SECONDARY_BUTTON_CLASS}>
+          <button
+            type="button"
+            onClick={handleClose}
+            className={SECONDARY_BUTTON_CLASS}
+          >
             Cancel
           </button>
           <button
