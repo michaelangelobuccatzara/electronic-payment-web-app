@@ -1,30 +1,9 @@
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "../../data/navigation";
-import type { PromissoryRequest, PromissoryStatus } from "../../types/types";
+import { PROMISSORY_STATUS_META } from "../../data/promissoryOptions";
+import type { PromissoryRequest } from "../../types/types";
 import { formatCurrency } from "../../utils/formatCurrency";
-import { StatusBadge, type BadgeTone } from "../ui/StatusBadge";
-
-interface RowPresentation {
-  tone: BadgeTone;
-  label: string;
-  actionLabel: string;
-  actionClassName: string;
-}
-
-const ROW_PRESENTATION: Record<PromissoryStatus, RowPresentation> = {
-  pending: {
-    tone: "pending",
-    label: "Pending",
-    actionLabel: "Review",
-    actionClassName: "text-primary hover:text-primary-container",
-  },
-  approved: {
-    tone: "success",
-    label: "Approved",
-    actionLabel: "View",
-    actionClassName: "text-outline hover:text-on-surface",
-  },
-};
+import { StatusBadge } from "../ui/StatusBadge";
 
 const CELL = "py-space-sm px-space-md";
 const HEADER_CELL = `${CELL} font-semibold`;
@@ -49,7 +28,8 @@ export function RecentPromissoryTable({ requests }: RecentPromissoryTableProps) 
       </thead>
       <tbody className="divide-y-0 text-on-surface">
         {requests.map((request) => {
-          const row = ROW_PRESENTATION[request.status];
+          const meta = PROMISSORY_STATUS_META[request.status];
+          const needsReview = request.status === "pending";
           return (
             <tr
               key={request.requestId}
@@ -58,9 +38,7 @@ export function RecentPromissoryTable({ requests }: RecentPromissoryTableProps) 
               <td className={`${CELL} font-data-tabular text-data-tabular font-medium text-on-surface`}>
                 {request.requestId}
               </td>
-              <td className={`${CELL} font-medium text-on-surface`}>
-                {request.studentName}
-              </td>
+              <td className={`${CELL} font-medium text-on-surface`}>{request.studentName}</td>
               <td className={`${CELL} font-body-sm text-body-sm text-on-surface-variant`}>
                 {request.yearLevel}
               </td>
@@ -68,14 +46,18 @@ export function RecentPromissoryTable({ requests }: RecentPromissoryTableProps) 
                 {formatCurrency(request.amountDue)}
               </td>
               <td className={`${CELL} text-center`}>
-                <StatusBadge tone={row.tone} label={row.label} />
+                <StatusBadge tone={meta.tone} label={meta.label} />
               </td>
               <td className={`${CELL} text-right`}>
                 <Link
                   to={ROUTE_PATHS.promissoryNotes}
-                  className={`font-body-sm text-body-sm font-semibold inline-flex items-center gap-0.5 ${row.actionClassName}`}
+                  className={`font-body-sm text-body-sm font-semibold inline-flex items-center gap-0.5 ${
+                    needsReview
+                      ? "text-primary hover:text-primary-container"
+                      : "text-outline hover:text-on-surface"
+                  }`}
                 >
-                  {row.actionLabel}
+                  {needsReview ? "Review" : "View"}
                 </Link>
               </td>
             </tr>

@@ -1,4 +1,4 @@
-export type BadgeTone = "success" | "pending" | "neutral";
+export type BadgeTone = "success" | "pending" | "neutral" | "danger" | "outlined" | "muted";
 type BadgeSize = "sm" | "md";
 
 const TONE_STYLES: Record<BadgeTone, { container: string; dot: string }> = {
@@ -14,11 +14,25 @@ const TONE_STYLES: Record<BadgeTone, { container: string; dot: string }> = {
     container: "bg-surface-container-high text-on-surface font-medium",
     dot: "bg-secondary",
   },
+  danger: {
+    container: "bg-error-container text-on-error-container font-semibold",
+    dot: "bg-error",
+  },
+  // A ring (not a border) so the badge keeps the same size as the others.
+  outlined: {
+    container:
+      "bg-surface-container-lowest text-primary-container ring-1 ring-inset ring-primary-container font-semibold",
+    dot: "bg-primary-container",
+  },
+  muted: {
+    container: "bg-surface-container-high text-on-surface-variant font-semibold",
+    dot: "bg-outline",
+  },
 };
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {
   sm: "gap-1 px-space-sm py-0.5",
-  md: "gap-1.5 px-2.5 py-1", // used by the staff table
+  md: "gap-1.5 px-2.5 py-1", // used by the staff and promissory tables
 };
 
 interface StatusBadgeProps {

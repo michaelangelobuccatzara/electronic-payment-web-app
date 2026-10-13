@@ -18,7 +18,30 @@ export interface Payment {
   status: PaymentStatus;
 }
 
-export type PromissoryStatus = "pending" | "approved";
+import type { PromissoryStatus } from "../data/promissoryOptions";
+export type { PromissoryStatus };
+
+// Append:
+export interface PromissoryNote {
+  requestId: string;
+  studentName: string;
+  studentNumber: string;
+  /** e.g. "BS Accountancy" */
+  program: string;
+  /** e.g. "2nd Yr" */
+  yearLevel: string;
+  /** Display string, e.g. "Mar 02, 2025". */
+  submissionDate: string;
+  amountDue: number;
+  status: PromissoryStatus;
+  deferralReason?: string;
+  rejectionReason?: string;
+}
+
+export interface PromissoryNotesSummary {
+  pendingCount: number;
+  totalRequests: number;
+}
 
 export interface PromissoryRequest {
   requestId: string;

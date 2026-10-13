@@ -26,6 +26,11 @@ import {
   SAMPLE_GRADING_PERIODS,
   SAMPLE_GRADING_SUMMARY,
 } from "./data/gradingPeriodSample";
+import { PromissoryNotes } from "./pages/PromissoryNotes";
+import {
+  SAMPLE_PROMISSORY_NOTES,
+  SAMPLE_PROMISSORY_SUMMARY,
+} from "./data/promissorySample";
 
 function App() {
   return (
@@ -86,7 +91,12 @@ function App() {
             />
             <Route
               path={ROUTE_PATHS.promissoryNotes}
-              element={<PlaceholderPage title="Promissory Notes" />}
+              element={
+                <PromissoryNotes
+                  initialNotes={SAMPLE_PROMISSORY_NOTES}
+                  summary={SAMPLE_PROMISSORY_SUMMARY}
+                />
+              }
             />
             <Route
               path={ROUTE_PATHS.payments}
