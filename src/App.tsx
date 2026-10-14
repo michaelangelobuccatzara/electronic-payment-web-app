@@ -11,10 +11,7 @@ import {
   SAMPLE_SUMMARY,
   SAMPLE_USER,
 } from "./data/dashboardSample";
-import {
-  SAMPLE_STAFF,
-  SAMPLE_STAFF_SUMMARY,
-} from "./data/staffSample";
+import { SAMPLE_STAFF, SAMPLE_STAFF_SUMMARY } from "./data/staffSample";
 import { StudentManagement } from "./pages/StudentManagement";
 import { SAMPLE_STUDENTS } from "./data/studentSample";
 import { GradingPeriods } from "./pages/GradingPeriods";
@@ -32,6 +29,7 @@ import {
   SAMPLE_PAYMENT_TRANSACTIONS,
   SAMPLE_PAYMENTS_SUMMARY,
 } from "./data/paymentSample";
+import { ProtectedRoute } from "./auth/ProtectedRoute";
 
 function App() {
   return (
@@ -40,71 +38,85 @@ function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
 
-          <Route
-            element={
-              <AdminLayout
-                navItems={NAV_ITEMS}
-                user={SAMPLE_USER}
-                academicCycleLabel={SAMPLE_ACADEMIC_CYCLE_LABEL}
+          <Route element={<ProtectedRoute />}>
+            <Route
+              element={
+                <AdminLayout
+                  navItems={NAV_ITEMS}
+                  user={SAMPLE_USER}
+                  academicCycleLabel={SAMPLE_ACADEMIC_CYCLE_LABEL}
+                />
+              }
+            >
+              <Route
+                path={ROUTE_PATHS.dashboard}
+                element={
+                  <ProtectedRoute roles={["Admin"]}>
+                    <AdminDashboard
+                      firstName={SAMPLE_USER.firstName}
+                      summary={SAMPLE_SUMMARY}
+                      recentPayments={SAMPLE_PAYMENTS}
+                      recentPromissoryRequests={SAMPLE_PROMISSORY_REQUESTS}
+                    />
+                  </ProtectedRoute>
+                }
               />
-            }
-          >
-            <Route
-              path={ROUTE_PATHS.dashboard}
-              element={
-                <AdminDashboard
-                  firstName={SAMPLE_USER.firstName}
-                  summary={SAMPLE_SUMMARY}
-                  recentPayments={SAMPLE_PAYMENTS}
-                  recentPromissoryRequests={SAMPLE_PROMISSORY_REQUESTS}
-                />
-              }
-            />
-            <Route
-              path={ROUTE_PATHS.staff}
-              element={
-                <StaffManagement
-                  staff={SAMPLE_STAFF}
-                  summary={SAMPLE_STAFF_SUMMARY}
-                />
-              }
-            />
-            <Route
-              path={ROUTE_PATHS.students}
-              element={
-                <StudentManagement
-                  initialStudents={SAMPLE_STUDENTS}
-                  totalStudents={SAMPLE_SUMMARY.totalStudents}
-                />
-              }
-            />
-            <Route
-              path={ROUTE_PATHS.gradingPeriods}
-              element={
-                <GradingPeriods
-                  periods={SAMPLE_GRADING_PERIODS}
-                  summary={SAMPLE_GRADING_SUMMARY}
-                />
-              }
-            />
-            <Route
-              path={ROUTE_PATHS.promissoryNotes}
-              element={
-                <PromissoryNotes
-                  initialNotes={SAMPLE_PROMISSORY_NOTES}
-                  summary={SAMPLE_PROMISSORY_SUMMARY}
-                />
-              }
-            />
-            <Route
-              path={ROUTE_PATHS.payments}
-              element={
-                <Payments
-                  transactions={SAMPLE_PAYMENT_TRANSACTIONS}
-                  summary={SAMPLE_PAYMENTS_SUMMARY}
-                />
-              }
-            />
+              <Route
+                path={ROUTE_PATHS.staff}
+                element={
+                  <ProtectedRoute roles={["Admin"]}>
+                    <StaffManagement
+                      staff={SAMPLE_STAFF}
+                      summary={SAMPLE_STAFF_SUMMARY}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.students}
+                element={
+                  <ProtectedRoute roles={["Admin"]}>
+                    <StudentManagement
+                      initialStudents={SAMPLE_STUDENTS}
+                      totalStudents={SAMPLE_SUMMARY.totalStudents}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.gradingPeriods}
+                element={
+                  <ProtectedRoute roles={["Admin"]}>
+                    <GradingPeriods
+                      periods={SAMPLE_GRADING_PERIODS}
+                      summary={SAMPLE_GRADING_SUMMARY}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.promissoryNotes}
+                element={
+                  <ProtectedRoute roles={["Admin", "Treasurer"]}>
+                    <PromissoryNotes
+                      initialNotes={SAMPLE_PROMISSORY_NOTES}
+                      summary={SAMPLE_PROMISSORY_SUMMARY}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.payments}
+                element={
+                  <ProtectedRoute roles={["Admin", "Cashier"]}>
+                    <Payments
+                      transactions={SAMPLE_PAYMENT_TRANSACTIONS}
+                      summary={SAMPLE_PAYMENTS_SUMMARY}
+                    />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
           </Route>
         </Routes>
       </Suspense>
