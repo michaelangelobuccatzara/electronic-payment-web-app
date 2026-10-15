@@ -1,3 +1,5 @@
+import type { LoginCredentials } from "./types";
+
 export interface AuthUser {
   sub: string;
   email: string;
@@ -13,7 +15,7 @@ export interface AuthState {
 }
 
 export interface AuthContextValue extends AuthState {
-  login: (username: string, password: string) => Promise<void>;
+  login: (credential: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshTokens: () => Promise<string | null>;
 }

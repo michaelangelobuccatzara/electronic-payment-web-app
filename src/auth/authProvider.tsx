@@ -7,6 +7,7 @@ import { apiClient } from "../api/axiosInstrance";
 import { setupInterceptors } from "../api/interceptors";
 import { parseJwt } from "../utils/parseJwt";
 import { PUBLIC_ROUTES } from "../utils/publicRoutes";
+import type { LoginCredentials } from "../types/types";
 
 const INITIAL_STATE: AuthState = {
   user: null,
@@ -75,8 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const { token: tokens, user } = await authService.login(username, password);
+  const login = useCallback(async ({username, password} : LoginCredentials) => {
+    const { token: tokens, user } = await authService.login({username, password});
     tokenStore.set(tokens);
     setState({ user, token: tokens, isAuthenticated: true, isLoading: false });
   }, []);

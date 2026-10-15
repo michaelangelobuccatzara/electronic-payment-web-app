@@ -174,3 +174,8 @@ export interface PaymentsSummary {
   totalCollected: number;
   totalTransactions: number;
 }
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}

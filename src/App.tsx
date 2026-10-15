@@ -30,6 +30,7 @@ import {
   SAMPLE_PAYMENTS_SUMMARY,
 } from "./data/paymentSample";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
+import { LoginPage } from "./pages/LoginPage";
 
 function App() {
   return (
@@ -37,7 +38,7 @@ function App() {
       <Suspense fallback={<div>Loading...</div>}>
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
-
+          <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route
               element={
