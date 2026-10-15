@@ -6,32 +6,18 @@ export const authService = {
   async login({
     username,
     password,
-  }: LoginCredentials): Promise<{ token: string; user: AuthUser }> {
+  }: LoginCredentials): Promise<string> {
     const res = await apiClient.post("/auth", {
       username: username,
       password: password,
     });
     if (res.status !== 200) throw new Error("Login failed");
 
-    const { data } = await apiClient.get("/users/me", {
-      headers: {
-        Authorization: `Bearer ${res.data}`,
-      },
-    });
-
-    return {
-      token: res.data,
-      user: {
-        sub: data.id,
-        email: data.username,
-        roles: data.roles,
-        name: data.name,
-      },
-    };
+    return res.data;
   },
 
   async refresh(): Promise<string> {
-    const res = await apiClient.post("/auth/refresh");
+    const res = await apiClient.post("/auth/refresh-token");
 
     if (res.status !== 200) throw new Error("Token refresh failed");
     return res.data;

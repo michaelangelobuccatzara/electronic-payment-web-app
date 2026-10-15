@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { use, useCallback, useEffect, useRef, useState } from "react";
 import type { AuthState } from "../types/auth.types";
 import { AuthContext } from "./authContext";
 import { tokenStore } from "./tokenStore";
@@ -77,9 +77,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = useCallback(async ({username, password} : LoginCredentials) => {
-    const { token: tokens, user } = await authService.login({username, password});
-    tokenStore.set(tokens);
-    setState({ user, token: tokens, isAuthenticated: true, isLoading: false });
+    const token = await authService.login({username, password});
+    tokenStore.set(token);
+
+    const user = await authService.Me();
+    
+    setState({ user, token: token, isAuthenticated: true, isLoading: false });
   }, []);
 
   const logout = useCallback(async () => {
