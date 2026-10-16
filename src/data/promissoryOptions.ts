@@ -1,11 +1,11 @@
 import type { BadgeTone } from "../components/ui/StatusBadge";
 
 export const PROMISSORY_STATUSES = [
-  "pending",
-  "approved",
-  "availed",
-  "cancelled",
-  "rejected",
+  "Pending",
+  "Approved",
+  "Availed",
+  "Cancelled",
+  "Rejected",
 ] as const;
 export type PromissoryStatus = (typeof PROMISSORY_STATUSES)[number];
 
@@ -17,11 +17,11 @@ export interface PromissoryStatusMeta {
 }
 
 export const PROMISSORY_STATUS_META: Record<PromissoryStatus, PromissoryStatusMeta> = {
-  pending: { label: "Pending", tone: "pending" },
-  approved: { label: "Approved", tone: "success" },
-  availed: { label: "Availed", tone: "outlined" },
-  cancelled: { label: "Cancelled", tone: "muted" },
-  rejected: { label: "Rejected", tone: "danger" },
+  Pending: { label: "Pending", tone: "pending" },
+  Approved: { label: "Approved", tone: "success" },
+  Availed: { label: "Availed", tone: "outlined" },
+  Cancelled: { label: "Cancelled", tone: "muted" },
+  Rejected: { label: "Rejected", tone: "danger" },
 };
 
 export const STATUS_FILTER_OPTIONS: readonly { value: PromissoryStatusFilter; label: string }[] = [

@@ -7,7 +7,7 @@ export interface UserProfile {
   role: string;
 }
 
-export type PaymentStatus = "successful" | "pending";
+export type PaymentStatus = "successful";
 
 export interface Payment {
   referenceNo: string;
@@ -41,21 +41,6 @@ export interface PromissoryNote {
 export interface PromissoryNotesSummary {
   pendingCount: number;
   totalRequests: number;
-}
-
-export interface PromissoryRequest {
-  requestId: string;
-  studentName: string;
-  yearLevel: string;
-  amountDue: number;
-  status: PromissoryStatus;
-}
-
-export interface DashboardSummary {
-  totalStudents: number;
-  totalStaff: number;
-  pendingPromissoryRequests: number;
-  paymentsCollected: number;
 }
 
 export type StaffStatus = "active";
@@ -178,4 +163,29 @@ export interface PaymentsSummary {
 export interface LoginCredentials {
   username: string;
   password: string;
+}
+
+export interface DashboardRecentPayment{
+  paymentNumber: string;
+  studentName: string;
+  yearLevel: string;
+  amount: number;
+  date: string;
+}
+
+export interface DashboardRecentPromissory{
+  promissoryNumber: string;
+  studentName: string;
+  yearLevel: string;
+  requestedAmount: number;
+  status: PromissoryStatus;
+}
+
+export interface DashboardSummary {
+  totalStudents: number;
+  totalStaffs: number;
+  totalPendingPromissoryRequests: number;
+  totalPaymentCollected: number;
+  recentPayments: DashboardRecentPayment[];
+  recentPromissories: DashboardRecentPromissory[];
 }

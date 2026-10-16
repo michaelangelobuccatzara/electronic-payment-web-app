@@ -22,14 +22,14 @@ export function ProtectedRoute({ roles, children }: ProtectedRouteProps) {
   }
 
   // Authenticated, but not allowed here: show 403, do NOT redirect to /login.
-  // if (roles && (!user || !roles.includes(user.role))) {
-  //   return (
-  //     <section role="alert" className="p-8">
-  //       <h1 className="text-xl font-semibold">Access denied</h1>
-  //       <p>You don't have permission to view this page.</p>
-  //     </section>
-  //   );
-  // }
+  if (roles && (!user || !roles.some(r => user.roles.includes(r)))) {
+    return (
+      <section role="alert" className="p-8">
+        <h1 className="text-xl font-semibold">Access denied</h1>
+        <p>You don't have permission to view this page.</p>
+      </section>
+    );
+  }
 
   return children ?? <Outlet />;
 }

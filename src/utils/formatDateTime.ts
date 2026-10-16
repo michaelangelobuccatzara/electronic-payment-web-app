@@ -11,6 +11,7 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 /** Date -> "Oct 24, 2024 • 09:41 AM" (in the viewer's local time zone). */
-export function formatDateTime(date: Date): string {
+export function formatDateTime(dateStr: string): string {
+  const date = new Date(dateStr);
   return `${dateFormatter.format(date)} • ${timeFormatter.format(date)}`;
 }

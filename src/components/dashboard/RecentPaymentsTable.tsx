@@ -1,17 +1,12 @@
-import type { Payment, PaymentStatus } from "../../types/types";
+import type { DashboardRecentPayment } from "../../types/types";
 import { formatCurrency } from "../../utils/formatCurrency";
-import { StatusBadge, type BadgeTone } from "../ui/StatusBadge";
-
-const STATUS_BADGES: Record<PaymentStatus, { tone: BadgeTone; label: string }> = {
-  successful: { tone: "success", label: "Successful" },
-  pending: { tone: "pending", label: "Pending" },
-};
+import { formatDateTime } from "../../utils/formatDateTime";
 
 const CELL = "py-space-sm px-space-md";
 const HEADER_CELL = `${CELL} font-semibold`;
 
 interface RecentPaymentsTableProps {
-  payments: readonly Payment[];
+  payments: DashboardRecentPayment[];
 }
 
 export function RecentPaymentsTable({ payments }: RecentPaymentsTableProps) {
@@ -29,14 +24,13 @@ export function RecentPaymentsTable({ payments }: RecentPaymentsTableProps) {
       </thead>
       <tbody className="divide-y-0 text-on-surface">
         {payments.map((payment) => {
-          const badge = STATUS_BADGES[payment.status];
           return (
             <tr
-              key={payment.referenceNo}
+              key={payment.paymentNumber}
               className="hover:bg-surface-container-low transition-colors font-body-md text-body-md"
             >
               <td className={`${CELL} font-data-tabular text-data-tabular font-medium text-on-surface`}>
-                {payment.referenceNo}
+                {payment.paymentNumber}
               </td>
               <td className={`${CELL} font-medium text-on-surface`}>
                 {payment.studentName}
@@ -48,7 +42,7 @@ export function RecentPaymentsTable({ payments }: RecentPaymentsTableProps) {
                 {formatCurrency(payment.amount)}
               </td>
               <td className={`${CELL} font-body-sm text-body-sm text-outline`}>
-                {payment.date}
+                {formatDateTime(payment.date)}
               </td>
             </tr>
           );

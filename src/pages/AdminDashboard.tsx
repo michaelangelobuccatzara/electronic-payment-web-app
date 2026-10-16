@@ -1,43 +1,57 @@
 import { ROUTE_PATHS } from "../data/navigation";
-import type {
-  DashboardSummary,
-  Payment,
-  PromissoryRequest,
-} from "../types/types";
-import { formatCurrency } from "../utils/formatCurrency";
 import { DashboardPanel } from "../components/dashboard/DashboardPanel";
 import { RecentPaymentsTable } from "../components/dashboard/RecentPaymentsTable";
 import { RecentPromissoryTable } from "../components/dashboard/RecentPromissoryTable";
 import { StatCard } from "../components/dashboard/StatCard";
 import { Icon } from "../components/ui/Icon";
 import { StatusBadge } from "../components/ui/StatusBadge";
+import { useAuth } from "../auth/useAuth";
+import { useEffect, useState } from "react";
+import { dashboardService } from "../components/dashboard/dashboardService";
+import type { DashboardSummary } from "../types/types";
 
-interface AdminDashboardProps {
-  firstName: string;
-  summary: DashboardSummary;
-  recentPayments: readonly Payment[];
-  recentPromissoryRequests: readonly PromissoryRequest[];
-}
+export function AdminDashboard() {
+  const [summary, setSummary] = useState<DashboardSummary>({
+    totalStudents: 0,
+    totalStaffs: 0,
+    totalPendingPromissoryRequests: 0,
+    totalPaymentCollected: 0,
+    recentPayments: [],
+    recentPromissories: [],
+  });
+  const [loading, setLoading] = useState<boolean>(true);
 
-const numberFormatter = new Intl.NumberFormat("en-US");
+  const { user } = useAuth();
 
-export function AdminDashboard({
-  firstName,
-  summary,
-  recentPayments,
-  recentPromissoryRequests,
-}: AdminDashboardProps) {
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        setSummary(await dashboardService.getSummary());
+      } catch (err) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetch();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+
   return (
     <div className="flex flex-col w-full">
       <div className="mb-space-xl">
         <div className="flex items-center gap-space-xs mb-1">
-          <span className="inline-block w-2 h-2 rounded-full bg-primary" aria-hidden="true" />
+          <span
+            className="inline-block w-2 h-2 rounded-full bg-primary"
+            aria-hidden="true"
+          />
           <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
             Bursar Operational Hub
           </span>
         </div>
         <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight">
-          Welcome back, {firstName}
+          Welcome back, {user?.name}
         </h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
           Overview of school finance and administrative activity for today.
@@ -47,29 +61,35 @@ export function AdminDashboard({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-space-md mb-space-xl">
         <StatCard
           label="Total Students"
-          value={numberFormatter.format(summary.totalStudents)}
+          value={`${summary?.totalStudents}`}
           caption="Enrolled this term"
-          accessory={<Icon name="school" className="text-title-sm text-outline" />}
+          accessory={
+            <Icon name="school" className="text-title-sm text-outline" />
+          }
         />
         <StatCard
           label="Total Staff"
-          value={numberFormatter.format(summary.totalStaff)}
+          value={`${summary?.totalStaffs}`}
           caption="Active academic & admin"
-          accessory={<Icon name="badge" className="text-title-sm text-outline" />}
+          accessory={
+            <Icon name="badge" className="text-title-sm text-outline" />
+          }
         />
         <StatCard
           label="Promissory Requests"
-          value={numberFormatter.format(summary.pendingPromissoryRequests)}
+          value={`${summary?.totalPendingPromissoryRequests}`}
           caption="Awaiting approval"
           valueTone="tertiary"
           accessory={<StatusBadge tone="pending" label="Requires Review" />}
         />
         <StatCard
           label="Payments Collected"
-          value={formatCurrency(summary.paymentsCollected)}
+          value={`${summary?.totalPaymentCollected}`}
           caption="This semester"
           valueTone="primary"
-          accessory={<Icon name="payments" className="text-title-sm text-primary" />}
+          accessory={
+            <Icon name="payments" className="text-title-sm text-primary" />
+          }
         />
       </div>
 
@@ -80,7 +100,7 @@ export function AdminDashboard({
           iconClassName="text-primary"
           viewAllTo={ROUTE_PATHS.payments}
         >
-          <RecentPaymentsTable payments={recentPayments} />
+          <RecentPaymentsTable payments={summary?.recentPayments} />
         </DashboardPanel>
 
         <DashboardPanel
@@ -89,7 +109,7 @@ export function AdminDashboard({
           iconClassName="text-tertiary"
           viewAllTo={ROUTE_PATHS.promissoryNotes}
         >
-          <RecentPromissoryTable requests={recentPromissoryRequests} />
+          <RecentPromissoryTable requests={summary?.recentPromissories} />
         </DashboardPanel>
       </div>
     </div>

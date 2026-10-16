@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ROUTE_PATHS } from "../../data/navigation";
 import { PROMISSORY_STATUS_META } from "../../data/promissoryOptions";
-import type { PromissoryRequest } from "../../types/types";
+import type { DashboardRecentPromissory } from "../../types/types";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { StatusBadge } from "../ui/StatusBadge";
 
@@ -9,7 +9,7 @@ const CELL = "py-space-sm px-space-md";
 const HEADER_CELL = `${CELL} font-semibold`;
 
 interface RecentPromissoryTableProps {
-  requests: readonly PromissoryRequest[];
+  requests: readonly DashboardRecentPromissory[];
 }
 
 export function RecentPromissoryTable({ requests }: RecentPromissoryTableProps) {
@@ -29,21 +29,21 @@ export function RecentPromissoryTable({ requests }: RecentPromissoryTableProps) 
       <tbody className="divide-y-0 text-on-surface">
         {requests.map((request) => {
           const meta = PROMISSORY_STATUS_META[request.status];
-          const needsReview = request.status === "pending";
+          const needsReview = request.status === "Pending";
           return (
             <tr
-              key={request.requestId}
+              key={request.promissoryNumber}
               className="hover:bg-surface-container-low transition-colors font-body-md text-body-md"
             >
               <td className={`${CELL} font-data-tabular text-data-tabular font-medium text-on-surface`}>
-                {request.requestId}
+                {request.promissoryNumber}
               </td>
               <td className={`${CELL} font-medium text-on-surface`}>{request.studentName}</td>
               <td className={`${CELL} font-body-sm text-body-sm text-on-surface-variant`}>
                 {request.yearLevel}
               </td>
               <td className={`${CELL} font-data-tabular text-data-tabular font-semibold text-right text-on-surface`}>
-                {formatCurrency(request.amountDue)}
+                {formatCurrency(request.requestedAmount)}
               </td>
               <td className={`${CELL} text-center`}>
                 <StatusBadge tone={meta.tone} label={meta.label} />

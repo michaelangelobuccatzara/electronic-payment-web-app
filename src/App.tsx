@@ -53,12 +53,7 @@ function App() {
                 path={ROUTE_PATHS.dashboard}
                 element={
                   <ProtectedRoute roles={["Admin"]}>
-                    <AdminDashboard
-                      firstName={SAMPLE_USER.firstName}
-                      summary={SAMPLE_SUMMARY}
-                      recentPayments={SAMPLE_PAYMENTS}
-                      recentPromissoryRequests={SAMPLE_PROMISSORY_REQUESTS}
-                    />
+                    <AdminDashboard />
                   </ProtectedRoute>
                 }
               />

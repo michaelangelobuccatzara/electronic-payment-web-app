@@ -1,11 +1,10 @@
-import React, { use, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { AuthState } from "../types/auth.types";
 import { AuthContext } from "./authContext";
 import { tokenStore } from "./tokenStore";
 import { authService } from "./authService";
 import { apiClient } from "../api/axiosInstrance";
 import { setupInterceptors } from "../api/interceptors";
-import { parseJwt } from "../utils/parseJwt";
 import { PUBLIC_ROUTES } from "../utils/publicRoutes";
 import type { LoginCredentials } from "../types/types";
 
@@ -51,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
 
         tokenStore.set(token);
-        const user = parseJwt(token);
+        const user = await authService.Me();
         setState({
           user,
           token: token,
@@ -94,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = await authService.refresh();
       tokenStore.set(token);
-      const user = parseJwt(token);
+      const user = await authService.Me();
       setState((s) => ({ ...s, user, token: token }));
       return token;
     } catch {
