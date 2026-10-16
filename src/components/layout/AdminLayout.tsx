@@ -13,7 +13,6 @@ interface AdminLayoutProps {
 
 export function AdminLayout({
   navItems,
-  user,
   academicCycleLabel,
 }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -53,7 +52,6 @@ export function AdminLayout({
       <div className="lg:pl-64">
         <TopNavBar
           sectionLabel={sectionLabel}
-          user={user}
           isSidebarOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen(true)}
           onLogout={handleLogout}

@@ -1,12 +1,11 @@
-import type { UserProfile } from "../../types/types";
 import { Icon } from "../ui/Icon";
 import { LiveClock } from "./LiveClock";
 import { useState } from "react";
 import { LogoutConfirmModal } from "./LogoutConfirmModal";
+import { useAuth } from "../../auth/useAuth";
 
 interface TopNavBarProps {
   sectionLabel: string;
-  user: UserProfile;
   isSidebarOpen: boolean;
   onMenuClick: () => void;
   onLogout: () => void;
@@ -14,12 +13,13 @@ interface TopNavBarProps {
 
 export function TopNavBar({
   sectionLabel,
-  user,
   isSidebarOpen,
   onMenuClick,
   onLogout,
 }: TopNavBarProps) {
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+
+  const { user } = useAuth();
 
   return (
     <>
@@ -68,10 +68,10 @@ export function TopNavBar({
           <div className="flex items-center gap-space-sm pl-space-xs border-l border-outline-variant">
             <div className="flex flex-col text-left">
               <span className="font-body-sm text-body-sm font-semibold text-on-surface leading-tight">
-                {user.name}
+                {user?.name}
               </span>
               <span className="font-label-sm text-label-sm text-outline leading-tight">
-                {user.role}
+                {user?.roles[0]}
               </span>
             </div>
 
