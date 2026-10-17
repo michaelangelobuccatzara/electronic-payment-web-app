@@ -86,7 +86,7 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
                     <span className="font-body-md text-body-md font-semibold text-on-surface leading-tight">
                       {formatFullName({
                         firstName: member.firstName,
-                        middleName: member.lastName,
+                        middleName: member.middleName,
                         lastName: member.lastName,
                       })}
                     </span>
@@ -107,7 +107,7 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
                       label="Edit Credentials"
                       target={formatFullName({
                         firstName: member.firstName,
-                        middleName: member.lastName,
+                        middleName: member.middleName,
                         lastName: member.lastName,
                       })}
                       hoverClassName="hover:text-on-surface hover:bg-surface-container"
@@ -118,7 +118,7 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
                       label="Revoke Access"
                       target={formatFullName({
                         firstName: member.firstName,
-                        middleName: member.lastName,
+                        middleName: member.middleName,
                         lastName: member.lastName,
                       })}
                       hoverClassName="hover:text-error hover:bg-error-container"

@@ -28,6 +28,7 @@ export function StaffManagement() {
     hasPreviousPage: false,
     hasNextPage: false,
   });
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -53,15 +54,17 @@ export function StaffManagement() {
 
   const closeAddDrawer = () => setIsAddDrawerOpen(false);
   const closeRevokeDialog = () => setStaffToRevoke(null);
+  const mount = () => setIsMounted(value => !value);
 
   // Persisting the new account / revoking access needs a data source, which isn't decided yet.
   const handleSaveStaff = async (draft: AddStaff) => {
     try {
       await staffService.addStaff(draft);
     } catch (err) {
-      console.log("Error gani", err);
+      throw err;
     } finally {
       closeAddDrawer();
+      mount();
     }
   };
   const handleConfirmRevoke = () => closeRevokeDialog();
@@ -91,7 +94,7 @@ export function StaffManagement() {
     };
 
     fetch();
-  }, [isAddDrawerOpen]);
+  }, [isMounted, currentPage]);
 
   if (loading) return <div>Loading ...</div>;
 
