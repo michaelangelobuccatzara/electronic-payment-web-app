@@ -1,10 +1,6 @@
-import type { StaffMember, StaffStatus } from "../../types/types";
+import type { StaffMember } from "../../types/types";
+import { formatFullName } from "../../utils/formatFullName";
 import { Icon } from "../ui/Icon";
-import { StatusBadge, type BadgeTone } from "../ui/StatusBadge";
-
-const STATUS_BADGES: Record<StaffStatus, { tone: BadgeTone; label: string }> = {
-  active: { tone: "success", label: "Active" },
-};
 
 const CELL = "py-3 px-4";
 const HEADER_CELL = `${CELL} font-semibold`;
@@ -17,7 +13,13 @@ interface RowActionProps {
   onClick?: () => void;
 }
 
-function RowAction({ icon, label, target, hoverClassName, onClick }: RowActionProps) {
+function RowAction({
+  icon,
+  label,
+  target,
+  hoverClassName,
+  onClick,
+}: RowActionProps) {
   return (
     <button
       type="button"
@@ -43,60 +45,82 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
       <caption className="sr-only">Staff members</caption>
       <thead>
         <tr className="bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider">
-          <th scope="col" className={HEADER_CELL}>Staff ID</th>
-          <th scope="col" className={HEADER_CELL}>Full Name</th>
-          <th scope="col" className={HEADER_CELL}>Email</th>
-          <th scope="col" className={HEADER_CELL}>Status</th>
-          <th scope="col" className={`${HEADER_CELL} text-right`}>Actions</th>
+          <th scope="col" className={HEADER_CELL}>
+            Staff ID
+          </th>
+          <th scope="col" className={HEADER_CELL}>
+            Full Name
+          </th>
+          <th scope="col" className={HEADER_CELL}>
+            Email
+          </th>
+          <th scope="col" className={`${HEADER_CELL} text-right`}>
+            Actions
+          </th>
         </tr>
       </thead>
       <tbody className="divide-y-0 text-on-surface font-body-md text-body-md">
         {staff.length === 0 ? (
           <tr>
-            <td colSpan={5} className={`${CELL} text-center text-on-surface-variant`}>
+            <td
+              colSpan={5}
+              className={`${CELL} text-center text-on-surface-variant`}
+            >
               No staff members match your search.
             </td>
           </tr>
         ) : (
           staff.map((member) => {
-            const badge = STATUS_BADGES[member.status];
             return (
               <tr
-                key={member.staffId}
+                key={member.id}
                 className="hover:bg-surface-container-low transition-colors"
               >
-                <td className={`${CELL} font-data-tabular text-data-tabular font-semibold text-primary`}>
-                  {member.staffId}
+                <td
+                  className={`${CELL} font-data-tabular text-data-tabular font-semibold text-primary`}
+                >
+                  {member.schoolId}
                 </td>
                 <td className={CELL}>
                   <div className="flex flex-col min-w-0">
                     <span className="font-body-md text-body-md font-semibold text-on-surface leading-tight">
-                      {member.fullName}
-                    </span>
-                    <span className="font-label-sm text-label-sm text-outline">
-                      {member.department}
+                      {formatFullName({
+                        firstName: member.firstName,
+                        middleName: member.lastName,
+                        lastName: member.lastName,
+                      })}
                     </span>
                   </div>
                 </td>
-                <td className={`${CELL} text-on-surface-variant font-data-tabular text-data-tabular`}>
-                  {member.email}
+                <td
+                  className={`${CELL} text-on-surface-variant font-data-tabular text-data-tabular`}
+                >
+                  {member.username}
                 </td>
-                <td className={CELL}>
+                {/* <td className={CELL}>
                   <StatusBadge tone={badge.tone} label={badge.label} size="md" />
-                </td>
+                </td> */}
                 <td className={`${CELL} text-right`}>
                   <div className="inline-flex items-center gap-1">
                     <RowAction
                       icon="edit"
                       label="Edit Credentials"
-                      target={member.fullName}
+                      target={formatFullName({
+                        firstName: member.firstName,
+                        middleName: member.lastName,
+                        lastName: member.lastName,
+                      })}
                       hoverClassName="hover:text-on-surface hover:bg-surface-container"
                       onClick={() => onEdit(member)}
                     />
                     <RowAction
                       icon="delete"
                       label="Revoke Access"
-                      target={member.fullName}
+                      target={formatFullName({
+                        firstName: member.firstName,
+                        middleName: member.lastName,
+                        lastName: member.lastName,
+                      })}
                       hoverClassName="hover:text-error hover:bg-error-container"
                       onClick={() => onRevoke(member)}
                     />

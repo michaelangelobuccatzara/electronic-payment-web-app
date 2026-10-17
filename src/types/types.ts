@@ -1,5 +1,8 @@
 import type { YearLevel } from "../data/studentOptions";
-import type { PaymentMethod, PaymentTransactionStatus } from "../data/paymentOptions";
+import type {
+  PaymentMethod,
+  PaymentTransactionStatus,
+} from "../data/paymentOptions";
 
 export interface UserProfile {
   firstName: string;
@@ -46,11 +49,14 @@ export interface PromissoryNotesSummary {
 export type StaffStatus = "active";
 
 export interface StaffMember {
-  staffId: string;
-  fullName: string;
-  department: string;
-  email: string;
-  status: StaffStatus;
+  id: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  schoolId: string;
+  username: string;
+  createdAt: string;
+  lastModifiedAt: string | null;
 }
 
 export interface StaffSummary {
@@ -58,9 +64,7 @@ export interface StaffSummary {
   activeAccounts: number;
 }
 
-export type StaffRole =
-  | "Cashier"
-  | "Treasurer";
+export type StaffRole = "Cashier" | "Treasurer";
 
 export type StaffPermissionId =
   | "view-balances"
@@ -68,10 +72,11 @@ export type StaffPermissionId =
   | "approve-promissory";
 
 export interface NewStaffDraft {
-  fullName: string;
-  email: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  password: string;
   role: StaffRole;
-  temporaryPassword: string;
 }
 
 export type StudentStatus = "enrolled"; // Only status in the design. Add members when others are designed.
@@ -110,13 +115,11 @@ export interface Student {
 }
 
 export type NewStudentDraft = Pick<
-  Student, "fullName" | "email" | "yearLevel" | "studentId"
+  Student,
+  "fullName" | "email" | "yearLevel" | "studentId"
 >;
 
-export type StudentEdits = Pick<
-  Student,
-  "fullName" | "yearLevel" | "email"
->;
+export type StudentEdits = Pick<Student, "fullName" | "yearLevel" | "email">;
 
 export type GradingPeriodStatus = "past" | "current" | "upcoming";
 
@@ -165,7 +168,7 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface DashboardRecentPayment{
+export interface DashboardRecentPayment {
   paymentNumber: string;
   studentName: string;
   yearLevel: string;
@@ -173,7 +176,7 @@ export interface DashboardRecentPayment{
   date: string;
 }
 
-export interface DashboardRecentPromissory{
+export interface DashboardRecentPromissory {
   promissoryNumber: string;
   studentName: string;
   yearLevel: string;
@@ -188,4 +191,22 @@ export interface DashboardSummary {
   totalPaymentCollected: number;
   recentPayments: DashboardRecentPayment[];
   recentPromissories: DashboardRecentPromissory[];
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface AddStaff {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  password: string;
+  role: string;
 }

@@ -1,7 +1,10 @@
-import { useState } from "react";
-import type { StaffMember, StaffSummary } from "../types/types";
+import { useEffect, useState } from "react";
+import {
+  type AddStaff,
+  type PagedResult,
+  type StaffMember,
+} from "../types/types";
 import { AddStaffDrawer } from "../components/staff/AddStaffDrawer";
-import { QuickStat } from "../components/staff/QuickStat";
 import { RevokeAccessDialog } from "../components/staff/RevokeAccessDialog";
 import { StaffTable } from "../components/staff/StaffTable";
 import { StaffToolbar } from "../components/staff/StaffToolbar";
@@ -9,19 +12,24 @@ import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
 import { EditStaffModal } from "../components/staff/EditStaffModal";
 import type { NameParts } from "../utils/splitFullName";
+import { staffService } from "../components/staff/staffService";
 
-const PAGE_SIZE = 6;
-
-interface StaffManagementProps {
-  staff: readonly StaffMember[];
-  summary: StaffSummary;
-}
-
-export function StaffManagement({ staff, summary }: StaffManagementProps) {
+export function StaffManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [staffToRevoke, setStaffToRevoke] = useState<StaffMember | null>(null);
+  const [pagination, setPagination] = useState<PagedResult<StaffMember>>({
+    items: [],
+    totalCount: 0,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  });
+
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<StaffMember | null>(null);
@@ -30,23 +38,32 @@ export function StaffManagement({ staff, summary }: StaffManagementProps) {
   const query = searchQuery.trim().toLowerCase();
   const visibleStaff =
     query === ""
-      ? staff
-      : staff.filter((member) =>
-          [member.staffId, member.fullName, member.email].some((field) =>
+      ? pagination.items
+      : pagination.items.filter((member) =>
+          [member.firstName, member.middleName, member.username].some((field) =>
             field.toLowerCase().includes(query),
           ),
         );
 
-  const totalItems = summary.totalPersonnel;
-  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-  const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalItems);
+  const rangeStart = (pagination.page - 1) * pagination.pageSize + 1;
+  const rangeEnd = Math.min(
+    pagination.page * pagination.pageSize,
+    pagination.totalCount,
+  );
 
   const closeAddDrawer = () => setIsAddDrawerOpen(false);
   const closeRevokeDialog = () => setStaffToRevoke(null);
 
   // Persisting the new account / revoking access needs a data source, which isn't decided yet.
-  const handleSaveStaff = () => closeAddDrawer();
+  const handleSaveStaff = async (draft: AddStaff) => {
+    try {
+      await staffService.addStaff(draft);
+    } catch (err) {
+      console.log("Error gani", err);
+    } finally {
+      closeAddDrawer();
+    }
+  };
   const handleConfirmRevoke = () => closeRevokeDialog();
 
   const openEditModal = (member: StaffMember) => {
@@ -61,6 +78,22 @@ export function StaffManagement({ staff, summary }: StaffManagementProps) {
     // This is where `staffId` and `names` go to your update call.
     closeEditModal();
   };
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        setPagination(
+          await staffService.getPagination(currentPage, searchQuery),
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetch();
+  }, [isAddDrawerOpen]);
+
+  if (loading) return <div>Loading ...</div>;
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -80,21 +113,6 @@ export function StaffManagement({ staff, summary }: StaffManagementProps) {
             access.
           </p>
         </div>
-
-        <div className="flex items-center gap-space-md self-start md:self-auto">
-          <QuickStat
-            label="Total Personnel"
-            value={summary.totalPersonnel}
-            icon="badge"
-            tone="neutral"
-          />
-          <QuickStat
-            label="Active Accounts"
-            value={summary.activeAccounts}
-            icon="verified_user"
-            tone="success"
-          />
-        </div>
       </div>
 
       <StaffToolbar
@@ -105,8 +123,11 @@ export function StaffManagement({ staff, summary }: StaffManagementProps) {
 
       <div className="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col w-full">
         <div className="overflow-x-auto">
-          <StaffTable staff={visibleStaff} onEdit={openEditModal} onRevoke={setStaffToRevoke} />
-
+          <StaffTable
+            staff={visibleStaff}
+            onEdit={openEditModal}
+            onRevoke={setStaffToRevoke}
+          />
 
           <EditStaffModal
             isOpen={isEditOpen}
@@ -116,11 +137,11 @@ export function StaffManagement({ staff, summary }: StaffManagementProps) {
           />
         </div>
         <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          totalItems={totalItems}
+          totalItems={pagination.totalCount}
           itemLabel="staff members"
           onPageChange={setCurrentPage}
         />

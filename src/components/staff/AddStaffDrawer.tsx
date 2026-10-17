@@ -1,7 +1,7 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { STAFF_ROLE_OPTIONS, isStaffRole } from "../../data/staffOptions";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
-import type { NewStaffDraft, StaffRole } from "../../types/types";
+import type { AddStaff, NewStaffDraft, StaffRole } from "../../types/types";
 import { Icon } from "../ui/Icon";
 
 const EDITABLE_INPUT =
@@ -13,7 +13,7 @@ interface FormState {
   lastName: string;
   email: string;
   role: StaffRole | "";
-  temporaryPassword: string;
+  password: string;
 }
 
 function createInitialForm(): FormState {
@@ -23,7 +23,7 @@ function createInitialForm(): FormState {
     lastName: "",
     email: "",
     role: "",
-    temporaryPassword: "",
+    password: "",
   };
 }
 
@@ -68,7 +68,7 @@ function FormField({
 interface AddStaffDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (draft: NewStaffDraft) => void;
+  onSave: (draft: AddStaff) => void;
 }
 
 export function AddStaffDrawer({
@@ -105,16 +105,12 @@ export function AddStaffDrawer({
     event.preventDefault();
     if (form.role === "") return; // The select is `required`; this also narrows the type.
 
-    const fullName = [form.firstName, form.middleName, form.lastName]
-      .map((part) => part.trim())
-      .filter((part) => part !== "")
-      .join(" ");
-
     onSave({
-      fullName,
-      email: form.email.trim(),
+      firstName: form.firstName,
+      middleName: form.middleName,
+      lastName: form.lastName,
       role: form.role,
-      temporaryPassword: form.temporaryPassword,
+      password: form.password,
     });
     setForm(createInitialForm());
     setShowPassword(false);
@@ -228,30 +224,6 @@ export function AddStaffDrawer({
             </span>
           </div>
 
-          <FormField
-            htmlFor={ids.email}
-            label="Institutional Email"
-            required
-            hint="Must end in institutional domain @ndtc.edu.ph"
-          >
-            <div className="relative">
-              <Icon
-                name="mail"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-outline text-body-md pointer-events-none"
-              />
-              <input
-                id={ids.email}
-                type="email"
-                required
-                value={form.email}
-                onChange={(event) => updateField("email", event.target.value)}
-                placeholder="username@ndtc.edu.ph"
-                aria-describedby={`${ids.email}-hint`}
-                className={`${EDITABLE_INPUT} w-full pl-9 pr-3`}
-              />
-            </div>
-          </FormField>
-
           <FormField htmlFor={ids.role} label="Operational Role" required>
             <div className="relative">
               <select
@@ -287,9 +259,9 @@ export function AddStaffDrawer({
                 type={showPassword ? "text" : "password"}
                 required
                 autoComplete="new-password"
-                value={form.temporaryPassword}
+                value={form.password}
                 onChange={(event) =>
-                  updateField("temporaryPassword", event.target.value)
+                  updateField("password", event.target.value)
                 }
                 aria-describedby={`${ids.password}-hint`}
                 className={`${EDITABLE_INPUT} w-full pl-3 pr-10`}
