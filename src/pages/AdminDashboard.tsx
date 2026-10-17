@@ -6,37 +6,22 @@ import { StatCard } from "../components/dashboard/StatCard";
 import { Icon } from "../components/ui/Icon";
 import { StatusBadge } from "../components/ui/StatusBadge";
 import { useAuth } from "../auth/useAuth";
-import { useEffect, useState } from "react";
 import { dashboardService } from "../components/dashboard/dashboardService";
-import type { DashboardSummary } from "../types/types";
+import { ErrorAlert } from "../components/ui/ErrorAlert";
+import { useApiQuery } from "../hooks/useApiQuery";
 
 export function AdminDashboard() {
-  const [summary, setSummary] = useState<DashboardSummary>({
-    totalStudents: 0,
-    totalStaffs: 0,
-    totalPendingPromissoryRequests: 0,
-    totalPaymentCollected: 0,
-    recentPayments: [],
-    recentPromissories: [],
-  });
-  const [loading, setLoading] = useState<boolean>(true);
-
   const { user } = useAuth();
+  // `getSummary` is a stable reference, so it can be passed directly.
+  const { data: summary, error, isLoading, reload } = useApiQuery(dashboardService.getSummary);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        setSummary(await dashboardService.getSummary());
-      } catch (err) {
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetch();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
+  if (summary === undefined) {
+    return isLoading ? (
+      <p role="status">Loading…</p>
+    ) : (
+      <ErrorAlert message={error ?? "Unable to load the dashboard."} onRetry={reload} />
+    );
+  }
 
   return (
     <div className="flex flex-col w-full">
