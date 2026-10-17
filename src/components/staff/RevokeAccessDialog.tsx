@@ -3,6 +3,7 @@ import { useEscapeKey } from "../../hooks/useEscapeKey";
 import type { StaffMember } from "../../types/types";
 import { getInitials } from "../../utils/getInitials";
 import { Icon } from "../ui/Icon";
+import { formatFullName } from "../../utils/formatFullName";
 
 interface RevokeAccessDialogProps {
   /** The person being revoked. `null` means the dialog is closed. */
@@ -46,14 +47,11 @@ export function RevokeAccessDialog({ member, onCancel, onConfirm }: RevokeAccess
 
         <div className="mx-space-lg mb-space-md p-space-sm bg-surface-container-low rounded-lg flex items-center gap-space-sm">
           <div className="w-8 h-8 rounded-xs bg-error-container text-on-error-container font-label-md text-label-md flex items-center justify-center font-bold">
-            {getInitials(member.fullName)}
+            {getInitials(`${member.firstName} ${member.middleName} ${member.lastName}`)}
           </div>
           <div className="flex flex-col">
             <span className="font-body-sm text-body-sm font-bold text-on-surface leading-tight">
-              {member.fullName} ({member.staffId})
-            </span>
-            <span className="font-label-sm text-label-sm text-outline">
-              {member.department} • {member.email}
+              {formatFullName({firstName: member.firstName, middleName: member.middleName, lastName: member.lastName})} ({member.schoolId})
             </span>
           </div>
         </div>

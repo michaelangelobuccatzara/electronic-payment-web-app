@@ -67,7 +67,16 @@ export function StaffManagement() {
       mount();
     }
   };
-  const handleConfirmRevoke = () => closeRevokeDialog();
+  const handleConfirmRevoke = async () => {
+    try {
+      await staffService.revokeStaff(staffToRevoke?.id!);
+    } catch (err) {
+      throw err;
+    } finally {
+      closeRevokeDialog();
+      mount();
+    }
+  };
 
   const openEditModal = (member: StaffMember) => {
     setMemberToEdit(member);
