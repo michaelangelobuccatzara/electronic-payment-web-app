@@ -1,6 +1,5 @@
-import { useId, useState, type FormEvent } from "react";
-import type { StaffMember } from "../../types/types";
-import { splitFullName, type NameParts } from "../../utils/splitFullName";
+import { useEffect, useId, useState, type FormEvent } from "react";
+import type { StaffMember, UpdateStaff } from "../../types/types";
 import { AnimatedModal } from "../ui/AnimatedModal";
 import { Icon } from "../ui/Icon";
 import {
@@ -9,18 +8,21 @@ import {
   SECONDARY_BUTTON_CLASS,
 } from "../student/StudentFormControls";
 
-const EMPTY_NAMES: NameParts = { firstName: "", middleName: "", lastName: "" };
-
 interface EditStaffModalProps {
   isOpen: boolean;
   /** Keep it set while the modal fades out, so the fields don't blank mid-animation. */
   member: StaffMember | null;
   onClose: () => void;
   /** Called with the id of the staff member being edited, plus the new name parts. */
-  onUpdate: (staffId: string, names: NameParts) => void;
+  onUpdate: (id: string, updateStaff: UpdateStaff) => void;
 }
 
-export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffModalProps) {
+export function EditStaffModal({
+  isOpen,
+  member,
+  onClose,
+  onUpdate,
+}: EditStaffModalProps) {
   const baseId = useId();
   const ids = {
     title: `${baseId}-title`,
@@ -29,32 +31,46 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
     lastName: `${baseId}-last-name`,
   };
 
-  const [names, setNames] = useState<NameParts>(() =>
-    member ? splitFullName(member.fullName) : EMPTY_NAMES,
-  );
+  const [staff, setStaff] = useState<UpdateStaff>({
+    firstName: "",
+    middleName: "",
+    lastName: "",
+  });
 
   // The modal stays mounted so it can fade, so the fields are reset during render
   // whenever it opens or the target member changes (no effect needed).
   const [previous, setPrevious] = useState({ isOpen, member });
   if (previous.isOpen !== isOpen || previous.member !== member) {
     setPrevious({ isOpen, member });
-    if (isOpen && member) setNames(splitFullName(member.fullName));
   }
 
-  const updateField = <K extends keyof NameParts>(key: K, value: NameParts[K]) => {
-    setNames((current) => ({ ...current, [key]: value }));
+  const updateField = <K extends keyof UpdateStaff>(
+    key: K,
+    value: UpdateStaff[K],
+  ) => {
+    setStaff((current) => ({ ...current, [key]: value }));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (member === null) return;
 
-    onUpdate(member.staffId, {
-      firstName: names.firstName.trim(),
-      middleName: names.middleName.trim(),
-      lastName: names.lastName.trim(),
+    onUpdate(member.id, {
+      firstName: staff?.firstName!,
+      middleName: staff?.middleName!,
+      lastName: staff?.lastName!,
     });
   };
+
+  useEffect(() => {
+    if (!isOpen || !member) return;
+
+    setStaff({
+      firstName: member.firstName ?? "",
+      middleName: member.middleName ?? "",
+      lastName: member.lastName ?? "",
+    });
+  }, [isOpen, member]);
 
   return (
     <AnimatedModal
@@ -65,12 +81,15 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
     >
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <h3 id={ids.title} className="font-headline-md text-headline-md font-bold text-on-surface">
+          <h3
+            id={ids.title}
+            className="font-headline-md text-headline-md font-bold text-on-surface"
+          >
             Edit Staff Member
           </h3>
           {member && (
             <p className="font-body-sm text-body-sm text-outline">
-              <span className="font-data-tabular">{member.staffId}</span>
+              <span className="font-data-tabular">{member.schoolId}</span>
             </p>
           )}
         </div>
@@ -84,7 +103,10 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-space-md mt-space-xs">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-space-md mt-space-xs"
+      >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
           <Field htmlFor={ids.firstName} label="First Name">
             <input
@@ -92,7 +114,7 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
               type="text"
               required
               autoComplete="given-name"
-              value={names.firstName}
+              value={staff?.firstName}
               onChange={(event) => updateField("firstName", event.target.value)}
               className={CONTROL_CLASS}
             />
@@ -102,8 +124,10 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
               id={ids.middleName}
               type="text"
               autoComplete="additional-name"
-              value={names.middleName}
-              onChange={(event) => updateField("middleName", event.target.value)}
+              value={staff?.middleName}
+              onChange={(event) =>
+                updateField("middleName", event.target.value)
+              }
               className={CONTROL_CLASS}
             />
           </Field>
@@ -113,7 +137,7 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
               type="text"
               required
               autoComplete="family-name"
-              value={names.lastName}
+              value={staff?.lastName}
               onChange={(event) => updateField("lastName", event.target.value)}
               className={CONTROL_CLASS}
             />
@@ -121,7 +145,11 @@ export function EditStaffModal({ isOpen, member, onClose, onUpdate }: EditStaffM
         </div>
 
         <div className="flex items-center justify-end gap-space-sm pt-space-sm">
-          <button type="button" onClick={onClose} className={SECONDARY_BUTTON_CLASS}>
+          <button
+            type="button"
+            onClick={onClose}
+            className={SECONDARY_BUTTON_CLASS}
+          >
             Cancel
           </button>
           <button

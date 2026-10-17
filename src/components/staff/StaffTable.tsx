@@ -51,9 +51,6 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
           <th scope="col" className={HEADER_CELL}>
             Full Name
           </th>
-          <th scope="col" className={HEADER_CELL}>
-            Email
-          </th>
           <th scope="col" className={`${HEADER_CELL} text-right`}>
             Actions
           </th>
@@ -91,11 +88,6 @@ export function StaffTable({ staff, onRevoke, onEdit }: StaffTableProps) {
                       })}
                     </span>
                   </div>
-                </td>
-                <td
-                  className={`${CELL} text-on-surface-variant font-data-tabular text-data-tabular`}
-                >
-                  {member.username}
                 </td>
                 {/* <td className={CELL}>
                   <StatusBadge tone={badge.tone} label={badge.label} size="md" />

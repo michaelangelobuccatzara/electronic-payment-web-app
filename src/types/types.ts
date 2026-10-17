@@ -210,3 +210,9 @@ export interface AddStaff {
   password: string;
   role: string;
 }
+
+export interface UpdateStaff {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+}

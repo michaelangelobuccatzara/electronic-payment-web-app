@@ -3,6 +3,7 @@ import {
   type AddStaff,
   type PagedResult,
   type StaffMember,
+  type UpdateStaff,
 } from "../types/types";
 import { AddStaffDrawer } from "../components/staff/AddStaffDrawer";
 import { RevokeAccessDialog } from "../components/staff/RevokeAccessDialog";
@@ -11,7 +12,6 @@ import { StaffToolbar } from "../components/staff/StaffToolbar";
 import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
 import { EditStaffModal } from "../components/staff/EditStaffModal";
-import type { NameParts } from "../utils/splitFullName";
 import { staffService } from "../components/staff/staffService";
 
 export function StaffManagement() {
@@ -54,7 +54,7 @@ export function StaffManagement() {
 
   const closeAddDrawer = () => setIsAddDrawerOpen(false);
   const closeRevokeDialog = () => setStaffToRevoke(null);
-  const mount = () => setIsMounted(value => !value);
+  const mount = () => setIsMounted((value) => !value);
 
   // Persisting the new account / revoking access needs a data source, which isn't decided yet.
   const handleSaveStaff = async (draft: AddStaff) => {
@@ -76,10 +76,15 @@ export function StaffManagement() {
   const closeEditModal = () => setIsEditOpen(false);
 
   // Receives the id of the staff member that was edited.
-  const handleUpdate = (staffId: string, names: NameParts) => {
-    // Persisting needs a data source, which isn't decided yet.
-    // This is where `staffId` and `names` go to your update call.
-    closeEditModal();
+  const handleUpdate = async (id: string, updateStaff: UpdateStaff) => {
+    try {
+      await staffService.updateStaff(id, updateStaff);
+    } catch (err) {
+      throw err;
+    } finally {
+      closeEditModal();
+      mount();
+    }
   };
 
   useEffect(() => {
