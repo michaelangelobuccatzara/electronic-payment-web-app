@@ -1,116 +1,80 @@
-import { useEffect, useState } from "react";
-import {
-  type AddStaff,
-  type PagedResult,
-  type StaffMember,
-  type UpdateStaff,
-} from "../types/types";
+import { useCallback, useState } from "react";
+import type { AddStaff, StaffMember, UpdateStaff } from "../types/types";
 import { AddStaffDrawer } from "../components/staff/AddStaffDrawer";
 import { RevokeAccessDialog } from "../components/staff/RevokeAccessDialog";
 import { StaffTable } from "../components/staff/StaffTable";
 import { StaffToolbar } from "../components/staff/StaffToolbar";
-import { Icon } from "../components/ui/Icon";
-import { Pagination } from "../components/ui/Pagination";
 import { EditStaffModal } from "../components/staff/EditStaffModal";
 import { staffService } from "../components/staff/staffService";
+import { Icon } from "../components/ui/Icon";
+import { Pagination } from "../components/ui/Pagination";
+import { ErrorAlert } from "../components/ui/ErrorAlert";
+import { useApiQuery } from "../hooks/useApiQuery";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 
 export function StaffManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [staffToRevoke, setStaffToRevoke] = useState<StaffMember | null>(null);
-  const [pagination, setPagination] = useState<PagedResult<StaffMember>>({
-    items: [],
-    totalCount: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0,
-    hasPreviousPage: false,
-    hasNextPage: false,
-  });
-  const [isMounted, setIsMounted] = useState<boolean>(false);
-
-  const [loading, setLoading] = useState<boolean>(true);
-
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [memberToEdit, setMemberToEdit] = useState<StaffMember | null>(null);
 
-  // Derived during render: no extra state or effect needed.
-  const query = searchQuery.trim().toLowerCase();
-  const visibleStaff =
-    query === ""
-      ? pagination.items
-      : pagination.items.filter((member) =>
-          [member.firstName, member.middleName, member.username].some((field) =>
-            field.toLowerCase().includes(query),
-          ),
-        );
+  const searchTerm = useDebouncedValue(searchQuery.trim(), 300);
 
-  const rangeStart = (pagination.page - 1) * pagination.pageSize + 1;
-  const rangeEnd = Math.min(
-    pagination.page * pagination.pageSize,
-    pagination.totalCount,
+  // A new search starts from page 1. Adjusting state during render (the same pattern as your
+  // modals) means the request below never fires with the new term and the old page.
+  const [pageSearchTerm, setPageSearchTerm] = useState(searchTerm);
+  if (pageSearchTerm !== searchTerm) {
+    setPageSearchTerm(searchTerm);
+    setCurrentPage(1);
+  }
+
+  const fetchStaff = useCallback(
+    (signal: AbortSignal) =>
+      staffService.getPagination(currentPage, searchTerm, signal),
+    [currentPage, searchTerm],
   );
+  const { data, error, isLoading, reload } = useApiQuery(fetchStaff);
+
+  const rangeStart = data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const rangeEnd = data ? Math.min(data.page * data.pageSize, data.totalCount) : 0;
 
   const closeAddDrawer = () => setIsAddDrawerOpen(false);
   const closeRevokeDialog = () => setStaffToRevoke(null);
-  const mount = () => setIsMounted((value) => !value);
-
-  // Persisting the new account / revoking access needs a data source, which isn't decided yet.
-  const handleSaveStaff = async (draft: AddStaff) => {
-    try {
-      await staffService.addStaff(draft);
-    } catch (err) {
-      throw err;
-    } finally {
-      closeAddDrawer();
-      mount();
-    }
-  };
-  const handleConfirmRevoke = async () => {
-    try {
-      await staffService.revokeStaff(staffToRevoke?.id!);
-    } catch (err) {
-      throw err;
-    } finally {
-      closeRevokeDialog();
-      mount();
-    }
-  };
+  const closeEditModal = () => setIsEditOpen(false);
 
   const openEditModal = (member: StaffMember) => {
     setMemberToEdit(member);
     setIsEditOpen(true);
   };
-  const closeEditModal = () => setIsEditOpen(false);
 
-  // Receives the id of the staff member that was edited.
-  const handleUpdate = async (id: string, updateStaff: UpdateStaff) => {
-    try {
-      await staffService.updateStaff(id, updateStaff);
-    } catch (err) {
-      throw err;
-    } finally {
-      closeEditModal();
-      mount();
-    }
+  // The handlers below let errors propagate. The drawer/modals catch them and show the message,
+  // and these only close the UI and refresh after a successful request.
+  const handleSaveStaff = async (draft: AddStaff) => {
+    await staffService.addStaff(draft);
+    closeAddDrawer();
+    reload();
   };
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        setPagination(
-          await staffService.getPagination(currentPage, searchQuery),
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleUpdate = async (id: string, updateStaff: UpdateStaff) => {
+    await staffService.updateStaff(id, updateStaff);
+    closeEditModal();
+    reload();
+  };
 
-    fetch();
-  }, [isMounted, currentPage]);
+  const handleConfirmRevoke = async () => {
+    if (staffToRevoke === null) return;
+    await staffService.revokeStaff(staffToRevoke.id);
+    closeRevokeDialog();
 
-  if (loading) return <div>Loading ...</div>;
+    // Removing the only row on the last page would leave an empty page.
+    if (data !== undefined && data.items.length === 1 && currentPage > 1) {
+      setCurrentPage(currentPage - 1); // changes the query, which refetches by itself
+    } else {
+      reload();
+    }
+  };
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -126,8 +90,7 @@ export function StaffManagement() {
             Staff Management
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-1">
-            Manage authorized school personnel, administrative roles, and system
-            access.
+            Manage authorized school personnel, administrative roles, and system access.
           </p>
         </div>
       </div>
@@ -138,13 +101,24 @@ export function StaffManagement() {
         onAddClick={() => setIsAddDrawerOpen(true)}
       />
 
+      {error !== null && <ErrorAlert message={error} onRetry={reload} />}
+
       <div className="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col w-full">
-        <div className="overflow-x-auto">
-          <StaffTable
-            staff={visibleStaff}
-            onEdit={openEditModal}
-            onRevoke={setStaffToRevoke}
-          />
+        <div
+          aria-busy={isLoading}
+          className={`overflow-x-auto transition-opacity ${
+            isLoading && data !== undefined ? "opacity-60" : ""
+          }`}
+        >
+          {data === undefined ? (
+            isLoading && (
+              <p role="status" className="p-space-lg font-body-md text-body-md text-on-surface-variant">
+                Loading staff…
+              </p>
+            )
+          ) : (
+            <StaffTable staff={data.items} onEdit={openEditModal} onRevoke={setStaffToRevoke} />
+          )}
 
           <EditStaffModal
             isOpen={isEditOpen}
@@ -153,22 +127,21 @@ export function StaffManagement() {
             onUpdate={handleUpdate}
           />
         </div>
-        <Pagination
-          currentPage={pagination.page}
-          totalPages={pagination.totalPages}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          totalItems={pagination.totalCount}
-          itemLabel="staff members"
-          onPageChange={setCurrentPage}
-        />
+
+        {data !== undefined && (
+          <Pagination
+            currentPage={data.page}
+            totalPages={data.totalPages}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            totalItems={data.totalCount}
+            itemLabel="staff members"
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
 
-      <AddStaffDrawer
-        isOpen={isAddDrawerOpen}
-        onClose={closeAddDrawer}
-        onSave={handleSaveStaff}
-      />
+      <AddStaffDrawer isOpen={isAddDrawerOpen} onClose={closeAddDrawer} onSave={handleSaveStaff} />
 
       <RevokeAccessDialog
         member={staffToRevoke}

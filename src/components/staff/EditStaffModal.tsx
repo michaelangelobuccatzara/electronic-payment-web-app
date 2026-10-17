@@ -7,6 +7,7 @@ import {
   Field,
   SECONDARY_BUTTON_CLASS,
 } from "../student/StudentFormControls";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
 interface EditStaffModalProps {
   isOpen: boolean;
@@ -14,7 +15,7 @@ interface EditStaffModalProps {
   member: StaffMember | null;
   onClose: () => void;
   /** Called with the id of the staff member being edited, plus the new name parts. */
-  onUpdate: (id: string, updateStaff: UpdateStaff) => void;
+  onUpdate: (id: string, updateStaff: UpdateStaff) => Promise<void>;
 }
 
 export function EditStaffModal({
@@ -51,14 +52,24 @@ export function EditStaffModal({
     setStaff((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const {
+    run: update,
+    isPending,
+    error,
+    reset: resetError,
+  } = useAsyncAction(onUpdate);
+  const handleClose = () => {
+    resetError();
+    onClose();
+  }; // use for onEscape, the X, and Cancel
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (member === null) return;
-
-    onUpdate(member.id, {
-      firstName: staff?.firstName!,
-      middleName: staff?.middleName!,
-      lastName: staff?.lastName!,
+    await update(member.id, {
+      firstName: staff.firstName,
+      middleName: staff.middleName,
+      lastName: staff.lastName,
     });
   };
 

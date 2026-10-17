@@ -3,6 +3,7 @@ import { STAFF_ROLE_OPTIONS, isStaffRole } from "../../data/staffOptions";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
 import type { AddStaff, NewStaffDraft, StaffRole } from "../../types/types";
 import { Icon } from "../ui/Icon";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
 const EDITABLE_INPUT =
   "h-10 bg-surface-container-lowest text-on-surface border border-outline-variant font-body-md text-body-md rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-xs";
@@ -68,7 +69,7 @@ function FormField({
 interface AddStaffDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (draft: AddStaff) => void;
+  onSave: (draft: AddStaff) => Promise<void>; // was: => void
 }
 
 export function AddStaffDrawer({
@@ -101,19 +102,37 @@ export function AddStaffDrawer({
     setForm((previous) => ({ ...previous, [key]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (form.role === "") return; // The select is `required`; this also narrows the type.
+  // inside the component, after the useState calls:
+  const {
+    run: save,
+    isPending,
+    error,
+    reset: resetError,
+  } = useAsyncAction(onSave);
 
-    onSave({
+  const handleClose = () => {
+    resetError();
+    onClose();
+  };
+  useEscapeKey(isOpen, handleClose); // use handleClose here, on the backdrop onClick, and on the X button
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (form.role === "") return;
+
+    const saved = await save({
       firstName: form.firstName,
       middleName: form.middleName,
       lastName: form.lastName,
       role: form.role,
       password: form.password,
     });
-    setForm(createInitialForm());
-    setShowPassword(false);
+
+    // Keep what the user typed if saving failed, so they can fix it and retry.
+    if (saved) {
+      setForm(createInitialForm());
+      setShowPassword(false);
+    }
   };
 
   return (
@@ -280,16 +299,26 @@ export function AddStaffDrawer({
               </button>
             </div>
           </FormField>
+
+          {error !== null && (
+            <div
+              role="alert"
+              className="rounded-lg bg-error-container p-space-sm font-body-sm text-body-sm text-on-error-container"
+            >
+              {error}
+            </div>
+          )}
         </form>
 
         <div className="p-space-md bg-surface-container-low border-t border-outline-variant flex items-center justify-end gap-space-sm">
           <button
             type="submit"
             form={ids.form}
-            className="h-10 px-5 bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5"
+            disabled={isPending}
+            className="h-10 px-5 bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-semibold rounded-lg shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <Icon name="check" className="text-body-md" />
-            <span>Save Staff Account</span>
+            <span>{isPending ? "Saving…" : "Save Staff Account"}</span>
           </button>
         </div>
       </div>
