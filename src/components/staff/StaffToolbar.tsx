@@ -24,7 +24,7 @@ export function StaffToolbar({
             aria-label="Search staff"
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search by staff ID, name, or email..."
+            placeholder="Search by first name or last name"
             className="w-full h-10 pl-10 pr-4 bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg focus:outline-hidden focus:bg-surface-container-lowest placeholder:text-outline shadow-inner"
           />
         </div>

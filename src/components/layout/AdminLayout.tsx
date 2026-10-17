@@ -4,6 +4,7 @@ import type { NavItem } from "../../data/navigation";
 import type { UserProfile } from "../../types/types";
 import { Sidebar } from "./Sidebar";
 import { TopNavBar } from "./TopNavBar";
+import { useAuth } from "../../auth/useAuth";
 
 interface AdminLayoutProps {
   navItems: readonly NavItem[];
@@ -20,9 +21,11 @@ export function AdminLayout({
 
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Clear the session (token, user data) here once authentication exists.
-    navigate("/login", { replace: true });
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout(); // calls the API (errors swallowed inside), then clears local state
+    navigate("/login", { replace: true }); // also drops the `from` state, so the next user doesn't land on the previous user's page
   };
 
   // Derived during render, so no state or effect is needed.

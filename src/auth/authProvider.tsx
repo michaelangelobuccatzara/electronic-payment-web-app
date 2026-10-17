@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: false,
       isLoading: false,
     });
-    window.location.href = "/login";
   }, []);
 
   useEffect(() => {
@@ -75,14 +74,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async ({username, password} : LoginCredentials) => {
-    const token = await authService.login({username, password});
-    tokenStore.set(token);
+  const login = useCallback(
+    async ({ username, password }: LoginCredentials) => {
+      const token = await authService.login({ username, password });
+      tokenStore.set(token);
 
-    const user = await authService.Me();
-    
-    setState({ user, token: token, isAuthenticated: true, isLoading: false });
-  }, []);
+      const user = await authService.Me();
+
+      setState({ user, token: token, isAuthenticated: true, isLoading: false });
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     await authService.logout().catch(() => {});
