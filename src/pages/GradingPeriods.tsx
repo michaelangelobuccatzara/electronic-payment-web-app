@@ -10,7 +10,12 @@ import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { Icon } from "../components/ui/Icon";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { formatAcademicYear } from "../utils/gradingPeriod";
-import type { AddGradingPeriod, GradingPeriodRecord } from "../types/types";
+import { EditGradingPeriodModal } from "../components/gradingPeriod/EditGradingPeriodModal";
+import type {
+  AddGradingPeriod,
+  GradingPeriodRecord,
+  UpdateGradingPeriod,
+} from "../types/types";
 
 export function GradingPeriods() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,9 +46,28 @@ export function GradingPeriods() {
             period.chargeDueDate.includes(query),
         );
 
-  // Placeholders until the POST and PUT endpoints are wired.
-  const handleEdit = (_period: GradingPeriodRecord) => {
-    // TODO: open the edit modal for this period.
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  // Stays set after closing, so the modal keeps its content while it fades out.
+  const [periodToEdit, setPeriodToEdit] = useState<GradingPeriodRecord | null>(
+    null,
+  );
+
+  const openEditModal = (period: GradingPeriodRecord) => {
+    setPeriodToEdit(period);
+    setIsEditOpen(true);
+  };
+  const closeEditModal = () => setIsEditOpen(false);
+
+  // Errors propagate to the modal, which displays them. Close and refresh only on success.
+  const handleUpdate = async (
+    periodId: string,
+    update: UpdateGradingPeriod,
+  ) => {
+    if (semester === undefined)
+      throw new Error("The current semester hasn't loaded yet.");
+    await semesterService.updateGradingPeriod(semester.id, periodId, update);
+    closeEditModal();
+    reload();
   };
 
   const nextSequence =
@@ -135,7 +159,7 @@ export function GradingPeriods() {
                     ? "No grading periods configured yet."
                     : "No grading periods match your search."
                 }
-                onEdit={handleEdit}
+                onEdit={openEditModal}
               />
             </div>
             <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
@@ -156,6 +180,13 @@ export function GradingPeriods() {
         nextSequence={nextSequence}
         onClose={closeAddModal}
         onSave={handleSavePeriod}
+      />
+
+      <EditGradingPeriodModal
+        isOpen={isEditOpen}
+        period={periodToEdit}
+        onClose={closeEditModal}
+        onUpdate={handleUpdate}
       />
     </div>
   );

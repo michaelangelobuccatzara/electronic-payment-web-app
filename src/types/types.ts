@@ -271,3 +271,5 @@ export interface AddGradingPeriod {
   chargeDueDate: string;
   sequence: number;
 }
+
+export type UpdateGradingPeriod = AddGradingPeriod;
