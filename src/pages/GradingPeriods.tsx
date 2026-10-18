@@ -16,6 +16,7 @@ import type {
   GradingPeriodRecord,
   UpdateGradingPeriod,
 } from "../types/types";
+import { DeleteGradingPeriodModal } from "../components/gradingPeriod/DeleteGradingPeriodModal";
 
 export function GradingPeriods() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,6 +83,27 @@ export function GradingPeriods() {
       throw new Error("The current semester hasn't loaded yet.");
     await semesterService.addGradingPeriod(semester.id, period);
     closeAddModal();
+    reload();
+  };
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  // Stays set after closing, so the modal keeps its content while it fades out.
+  const [periodToDelete, setPeriodToDelete] =
+    useState<GradingPeriodRecord | null>(null);
+
+  const requestDelete = (period: GradingPeriodRecord) => {
+    setPeriodToDelete(period);
+    setIsDeleteOpen(true);
+  };
+  const closeDeleteModal = () => setIsDeleteOpen(false);
+
+  // Errors propagate to the modal, which displays them. Close and refresh only on success.
+  const handleConfirmDelete = async () => {
+    if (semester === undefined)
+      throw new Error("The current semester hasn't loaded yet.");
+    if (periodToDelete === null) return;
+    await semesterService.deleteGradingPeriod(semester.id, periodToDelete.id);
+    closeDeleteModal();
     reload();
   };
 
@@ -160,6 +182,7 @@ export function GradingPeriods() {
                     : "No grading periods match your search."
                 }
                 onEdit={openEditModal}
+                onDelete={requestDelete}
               />
             </div>
             <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
@@ -187,6 +210,13 @@ export function GradingPeriods() {
         period={periodToEdit}
         onClose={closeEditModal}
         onUpdate={handleUpdate}
+      />
+
+      <DeleteGradingPeriodModal
+        isOpen={isDeleteOpen}
+        period={periodToDelete}
+        onCancel={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

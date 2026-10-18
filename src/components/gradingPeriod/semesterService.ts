@@ -32,4 +32,13 @@ export const semesterService = {
       period,
     );
   },
+
+  async deleteGradingPeriod(
+    semesterId: string,
+    gradingPeriodId: string,
+  ): Promise<void> {
+    await apiClient.delete(
+      `/semesters/${semesterId}/grading-periods/${gradingPeriodId}`,
+    );
+  },
 };
