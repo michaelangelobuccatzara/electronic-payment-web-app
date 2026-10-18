@@ -26,7 +26,9 @@ interface DetailItemProps {
 function DetailItem({ label, value, emphasized = false }: DetailItemProps) {
   return (
     <div className="flex flex-col">
-      <dt className="font-label-sm text-label-sm text-outline uppercase font-semibold">{label}</dt>
+      <dt className="font-label-sm text-label-sm text-outline uppercase font-semibold">
+        {label}
+      </dt>
       <dd
         className={
           emphasized
@@ -50,7 +52,12 @@ interface ReviewPanelProps {
   onReject: (id: string, request: RejectPromissory) => Promise<void>;
 }
 
-function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanelProps) {
+function ReviewPanel({
+  promissoryId,
+  onClose,
+  onApprove,
+  onReject,
+}: ReviewPanelProps) {
   const baseId = useId();
   const ids = {
     title: `${baseId}-title`,
@@ -65,7 +72,12 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
     (signal: AbortSignal) => promissoryService.getById(promissoryId, signal),
     [promissoryId],
   );
-  const { data: note, error: loadError, isLoading, reload } = useApiQuery(fetchNote);
+  const {
+    data: note,
+    error: loadError,
+    isLoading,
+    reload,
+  } = useApiQuery(fetchNote);
 
   const [mode, setMode] = useState<DecisionMode>("review");
 
@@ -145,10 +157,17 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
           <div className="flex flex-col">
             {meta && (
               <div className="flex items-center gap-space-xs">
-                <StatusBadge tone={meta.tone} label={meta.label} showDot={false} />
+                <StatusBadge
+                  tone={meta.tone}
+                  label={meta.label}
+                  showDot={false}
+                />
               </div>
             )}
-            <h2 id={ids.title} className="font-headline-md text-headline-md font-bold text-on-surface mt-1">
+            <h2
+              id={ids.title}
+              className="font-headline-md text-headline-md font-bold text-on-surface mt-1"
+            >
               {title}
             </h2>
           </div>
@@ -162,12 +181,20 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
           </button>
         </div>
 
-        <div aria-busy={isLoading} className="p-space-lg flex flex-col gap-space-lg flex-1">
-          {loadError !== null && <ErrorAlert message={loadError} onRetry={reload} />}
+        <div
+          aria-busy={isLoading}
+          className="p-space-lg flex flex-col gap-space-lg flex-1"
+        >
+          {loadError !== null && (
+            <ErrorAlert message={loadError} onRetry={reload} />
+          )}
 
           {note === undefined ? (
             isLoading && (
-              <p role="status" className="font-body-md text-body-md text-on-surface-variant">
+              <p
+                role="status"
+                className="font-body-md text-body-md text-on-surface-variant"
+              >
                 Loading details…
               </p>
             )
@@ -180,12 +207,22 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
               </div>
 
               <dl className="grid grid-cols-2 gap-space-md bg-surface-container rounded-lg p-space-md">
-                <DetailItem label="Current Balance" value={formatCurrency(note.currentBalance)} emphasized />
                 <DetailItem
-                  label="Approved Amount"
-                  value={note.approvedAmount === null ? "—" : formatCurrency(note.approvedAmount)}
+                  label="Current Balance"
+                  value={formatCurrency(note.currentBalance)}
                   emphasized
                 />
+                {note.status !== "Rejected" && (
+                  <DetailItem
+                    label="Approved Amount"
+                    value={
+                      note.approvedAmount === null
+                        ? "—"
+                        : formatCurrency(note.approvedAmount)
+                    }
+                    emphasized
+                  />
+                )}
               </dl>
 
               {note.note && (
@@ -194,7 +231,10 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
                     Student's Note
                   </span>
                   <div className="flex items-start gap-space-xs text-on-surface">
-                    <Icon name="format_quote" className="text-body-md text-secondary mt-0.5" />
+                    <Icon
+                      name="format_quote"
+                      className="text-body-md text-secondary mt-0.5"
+                    />
                     <p className="font-body-md text-body-md italic leading-relaxed text-on-surface">
                       “{note.note}”
                     </p>
@@ -202,18 +242,48 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
                 </div>
               )}
 
+              {note.status === "Rejected" && note.rejectionNote && (
+                <div
+                  role="note"
+                  className="flex flex-col bg-error-container text-on-error-container p-space-md rounded-lg"
+                >
+                  <span className="font-label-sm text-label-sm uppercase font-semibold mb-1">
+                    Reason for Rejection
+                  </span>
+                  <div className="flex items-start gap-space-xs">
+                    <Icon name="block" className="text-body-md mt-0.5" />
+                    <p className="font-body-md text-body-md leading-relaxed">
+                      {note.rejectionNote}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
-                <DetailItem label="Submitted" value={formatDateTime(note.createdAt)} />
+                <DetailItem
+                  label="Submitted"
+                  value={formatDateTime(note.createdAt)}
+                />
                 {note.lastModifiedAt && (
-                  <DetailItem label="Last Updated" value={formatDateTime(note.lastModifiedAt)} />
+                  <DetailItem
+                    label="Last Updated"
+                    value={formatDateTime(note.lastModifiedAt)}
+                  />
                 )}
                 {note.cateredStaffFullName && (
-                  <DetailItem label="Handled By" value={note.cateredStaffFullName} />
+                  <DetailItem
+                    label="Handled By"
+                    value={note.cateredStaffFullName}
+                  />
                 )}
               </dl>
 
               {canDecide && !isRejectStep && (
-                <form id={ids.approveForm} onSubmit={handleApprove} className="flex flex-col gap-space-xs">
+                <form
+                  id={ids.approveForm}
+                  onSubmit={handleApprove}
+                  className="flex flex-col gap-space-xs"
+                >
                   <label
                     htmlFor={ids.amount}
                     className="font-label-md text-label-md font-semibold text-on-surface"
@@ -240,7 +310,11 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
               )}
 
               {isRejectStep && (
-                <form id={ids.rejectForm} onSubmit={handleReject} className="flex flex-col gap-space-xs">
+                <form
+                  id={ids.rejectForm}
+                  onSubmit={handleReject}
+                  className="flex flex-col gap-space-xs"
+                >
                   <label
                     htmlFor={ids.reason}
                     className="font-label-md text-label-md font-semibold text-on-surface"
@@ -265,19 +339,33 @@ function ReviewPanel({ promissoryId, onClose, onApprove, onReject }: ReviewPanel
                 </form>
               )}
 
-              {!isRejectStep && approveError !== null && <ErrorAlert message={approveError} />}
-              {isRejectStep && rejectError !== null && <ErrorAlert message={rejectError} />}
+              {!isRejectStep && approveError !== null && (
+                <ErrorAlert message={approveError} />
+              )}
+              {isRejectStep && rejectError !== null && (
+                <ErrorAlert message={rejectError} />
+              )}
             </>
           )}
         </div>
 
         <div className="p-space-lg bg-surface-container-low flex flex-col-reverse sm:flex-row items-center justify-between gap-space-sm">
           {isRejectStep ? (
-            <button type="button" onClick={backToReview} disabled={isPending} className={SECONDARY_BUTTON}>
+            <button
+              type="button"
+              onClick={backToReview}
+              disabled={isPending}
+              className={SECONDARY_BUTTON}
+            >
               Back
             </button>
           ) : (
-            <button type="button" onClick={onClose} disabled={isPending} className={SECONDARY_BUTTON}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isPending}
+              className={SECONDARY_BUTTON}
+            >
               {canDecide ? "Cancel" : "Close"}
             </button>
           )}
@@ -331,7 +419,12 @@ interface ReviewDrawerProps {
   onReject: (id: string, request: RejectPromissory) => Promise<void>;
 }
 
-export function ReviewDrawer({ promissoryId, onClose, onApprove, onReject }: ReviewDrawerProps) {
+export function ReviewDrawer({
+  promissoryId,
+  onClose,
+  onApprove,
+  onReject,
+}: ReviewDrawerProps) {
   if (promissoryId === null) return null;
 
   // `key` gives each request its own panel, so its state, mode and fetch start fresh every time.

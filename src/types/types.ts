@@ -280,6 +280,7 @@ export interface PromissoryRecord {
   currentBalance: number;
   approvedAmount: number | null;
   status: PromissoryStatus;
+  rejectionNote?: string | null;
   createdAt: string;
   lastModifiedAt: string | null;
   studentFullName: string;
