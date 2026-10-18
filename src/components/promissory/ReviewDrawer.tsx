@@ -251,8 +251,15 @@ function ReviewPanel({
                     Reason for Rejection
                   </span>
                   <div className="flex items-start gap-space-xs">
-                    <Icon name="block" className="text-body-md mt-0.5" />
-                    <p className="font-body-md text-body-md leading-relaxed">
+                    <Icon
+                      name="block"
+                      className="text-body-md mt-0.5 shrink-0"
+                    />
+                    <p
+                      tabIndex={0}
+                      aria-label="Reason for rejection (scrollable)"
+                      className="min-w-0 max-h-40 overflow-y-auto pr-1 font-body-md text-body-md leading-relaxed whitespace-pre-wrap wrap-break-word focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+                    >
                       {note.rejectionNote}
                     </p>
                   </div>
