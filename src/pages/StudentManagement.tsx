@@ -1,95 +1,73 @@
-import { useState } from "react";
-import type { YearFilter } from "../data/studentOptions";
-import type { NewStudentDraft } from "../types/types";
+import { useCallback, useState } from "react";
 import { AddStudentModal } from "../components/student/AddStudentModal";
-import { DeleteStudentModal } from "../components/student/DeleteStudentModal";
 import { StudentTable } from "../components/student/StudentTable";
 import { StudentToolbar } from "../components/student/StudentToolbar";
+import { studentService } from "../components/student/studentService";
+import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
+import { useApiQuery } from "../hooks/useApiQuery";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EditStudentModal } from "../components/student/EditStudentModal";
-import type { AddStudent, Student, StudentEdits } from "../types/types"; // NewStudentDraft → AddStudent
-import { studentService } from "../components/student/studentService";
+import type { AddStudent, StudentRecord, UpdateStudent } from "../types/types";
 
-const PAGE_SIZE = 6;
-
-interface StudentManagementProps {
-  /** Seed data. The page edits its own copy in memory until a data source exists. */
-  initialStudents: readonly Student[];
-  totalStudents: number;
-}
-
-export function StudentManagement({
-  initialStudents,
-  totalStudents,
-}: StudentManagementProps) {
-  const [students, setStudents] = useState<readonly Student[]>(initialStudents);
+export function StudentManagement() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [yearFilter, setYearFilter] = useState<YearFilter>("all");
   const [currentPage, setCurrentPage] = useState(1);
-
-  // The "active" and "target" numbers stay set after closing, so the dialogs keep their content
-  // while they animate out. The `isOpen` flags control visibility.
-  const [deleteTargetNumber, setDeleteTargetNumber] = useState<string | null>(
-    null,
-  );
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  const [editNumber, setEditNumber] = useState<string | null>(null);
+  const searchTerm = useDebouncedValue(searchQuery.trim(), 300);
+
   const [isEditOpen, setIsEditOpen] = useState(false);
+  // Stays set after closing, so the modal keeps its content while it fades out.
+  const [studentToEdit, setStudentToEdit] = useState<StudentRecord | null>(
+    null,
+  );
 
-  // Derived during render: no extra state or effects.
-  const query = searchQuery.trim().toLowerCase();
-  const visibleStudents = students.filter((student) => {
-    const matchesSearch =
-      query === "" ||
-      student.studentId.toLowerCase().includes(query) ||
-      student.fullName.toLowerCase().includes(query);
-    const matchesYear =
-      yearFilter === "all" || student.yearLevel === yearFilter;
-    return matchesSearch && matchesYear;
-  });
-  const editStudent =
-    students.find((student) => student.studentId === editNumber) ?? null;
-
-  const totalPages = Math.ceil(totalStudents / PAGE_SIZE);
-  const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(currentPage * PAGE_SIZE, totalStudents);
-
-  const requestDelete = (student: Student) => {
-    setDeleteTargetNumber(student.studentId);
-    setIsDeleteOpen(true);
-  };
-
-  const confirmDelete = () => {
-    setStudents((previous) =>
-      previous.filter((student) => student.studentId !== deleteTargetNumber),
-    );
-    setIsDeleteOpen(false);
-  };
-
-  // replaces the old addStudent
-  const addStudent = async (student: AddStudent) => {
-    await studentService.addStudent(student); // a failure propagates to the modal, which shows it
-    setIsAddOpen(false);
-  };
-  const openEditModal = (student: Student) => {
-    setEditNumber(student.studentId);
+  const openEditModal = (student: StudentRecord) => {
+    setStudentToEdit(student);
     setIsEditOpen(true);
   };
+  const closeEditModal = () => setIsEditOpen(false);
 
-  // Receives the student number (the record's id) and the edited values.
-  const handleUpdate = (studentNumber: string, edits: StudentEdits) => {
-    setStudents((previous) =>
-      previous.map((student) =>
-        student.studentId === studentNumber
-          ? { ...student, ...edits }
-          : student,
-      ),
-    );
-    setIsEditOpen(false);
+  // A new search starts from page 1 (adjusted during render, so no extra request fires).
+  const [pageSearchTerm, setPageSearchTerm] = useState(searchTerm);
+  if (pageSearchTerm !== searchTerm) {
+    setPageSearchTerm(searchTerm);
+    setCurrentPage(1);
+  }
+
+  const fetchStudents = useCallback(
+    (signal: AbortSignal) =>
+      studentService.getPagination(currentPage, searchTerm, signal),
+    [currentPage, searchTerm],
+  );
+  const { data, error, isLoading, reload } = useApiQuery(fetchStudents);
+
+  const rangeStart =
+    data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const rangeEnd = data
+    ? Math.min(data.page * data.pageSize, data.totalCount)
+    : 0;
+
+  // Errors propagate to the modal, which displays them. Close and refresh only on success.
+  const addStudent = async (student: AddStudent) => {
+    await studentService.addStudent(student);
+    setIsAddOpen(false);
+    reload();
   };
+
+  const handleDelete = (_student: StudentRecord) => {
+    // TODO: open the delete confirmation (DELETE /students/{id}).
+  };
+
+  // Errors propagate to the modal, which displays them. Close and refresh only on success.
+  const handleUpdate = async (id: string, update: UpdateStudent) => {
+    await studentService.updateStudent(id, update);
+    closeEditModal();
+    reload();
+  };
+
   return (
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
@@ -120,36 +98,52 @@ export function StudentManagement({
       <StudentToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        yearFilter={yearFilter}
-        onYearFilterChange={setYearFilter}
       />
+
+      {error !== null && <ErrorAlert message={error} onRetry={reload} />}
 
       <div className="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col">
-        <div className="overflow-x-auto w-full">
-          <StudentTable
-            students={visibleStudents}
-            onEdit={openEditModal}
-            onDelete={requestDelete}
-          />
+        <div
+          aria-busy={isLoading}
+          className={`overflow-x-auto w-full transition-opacity ${
+            isLoading && data !== undefined ? "opacity-60" : ""
+          }`}
+        >
+          {data === undefined ? (
+            isLoading && (
+              <p
+                role="status"
+                className="p-space-lg font-body-md text-body-md text-on-surface-variant"
+              >
+                Loading students…
+              </p>
+            )
+          ) : (
+            <StudentTable
+              students={data.items}
+              emptyMessage={
+                searchTerm === ""
+                  ? "No students enrolled yet."
+                  : "No students match your search."
+              }
+              onEdit={openEditModal}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
-        <Pagination
-          variant="compact"
-          currentPage={currentPage}
-          totalPages={totalPages}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          totalItems={totalStudents}
-          itemLabel="students"
-          onPageChange={setCurrentPage}
-        />
+        {data !== undefined && (
+          <Pagination
+            variant="compact"
+            currentPage={data.page}
+            totalPages={data.totalPages}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            totalItems={data.totalCount}
+            itemLabel="students"
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
-
-      <EditStudentModal
-        isOpen={isEditOpen}
-        student={editStudent}
-        onClose={() => setIsEditOpen(false)}
-        onUpdate={handleUpdate}
-      />
 
       <AddStudentModal
         isOpen={isAddOpen}
@@ -157,11 +151,11 @@ export function StudentManagement({
         onAdd={addStudent}
       />
 
-      <DeleteStudentModal
-        isOpen={isDeleteOpen}
-        studentNumber={deleteTargetNumber}
-        onCancel={() => setIsDeleteOpen(false)}
-        onConfirm={confirmDelete}
+      <EditStudentModal
+        isOpen={isEditOpen}
+        student={studentToEdit}
+        onClose={closeEditModal}
+        onUpdate={handleUpdate}
       />
     </div>
   );

@@ -6,14 +6,9 @@ import { StaffManagement } from "./pages/StaffManagement";
 import { NAV_ITEMS, ROUTE_PATHS } from "./data/navigation";
 import {
   SAMPLE_ACADEMIC_CYCLE_LABEL,
-  SAMPLE_PAYMENTS,
-  SAMPLE_PROMISSORY_REQUESTS,
-  SAMPLE_SUMMARY,
   SAMPLE_USER,
 } from "./data/dashboardSample";
-import { SAMPLE_STAFF, SAMPLE_STAFF_SUMMARY } from "./data/staffSample";
 import { StudentManagement } from "./pages/StudentManagement";
-import { SAMPLE_STUDENTS } from "./data/studentSample";
 import { GradingPeriods } from "./pages/GradingPeriods";
 import {
   SAMPLE_GRADING_PERIODS,
@@ -61,10 +56,7 @@ function App() {
                 path={ROUTE_PATHS.staff}
                 element={
                   <ProtectedRoute roles={["Admin"]}>
-                    <StaffManagement
-                      staff={SAMPLE_STAFF}
-                      summary={SAMPLE_STAFF_SUMMARY}
-                    />
+                    <StaffManagement />
                   </ProtectedRoute>
                 }
               />
@@ -72,10 +64,7 @@ function App() {
                 path={ROUTE_PATHS.students}
                 element={
                   <ProtectedRoute roles={["Admin"]}>
-                    <StudentManagement
-                      initialStudents={SAMPLE_STUDENTS}
-                      totalStudents={SAMPLE_SUMMARY.totalStudents}
-                    />
+                    <StudentManagement />
                   </ProtectedRoute>
                 }
               />

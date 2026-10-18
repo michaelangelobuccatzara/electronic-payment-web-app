@@ -225,3 +225,20 @@ export interface AddStudent {
   studentType: StudentType;
   rfid: string;
 }
+
+export interface StudentRecord {
+  id: string;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  schoolId: string;
+  username: string;
+  createdAt: string;
+  lastModifiedAt: string | null;
+}
+
+export interface UpdateStudent {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+}

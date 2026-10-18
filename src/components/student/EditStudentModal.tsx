@@ -1,44 +1,26 @@
 import { useId, useState, type FormEvent } from "react";
-import {
-  isYearLevel,
-  YEAR_LEVELS,
-  type YearLevel,
-} from "../../data/studentOptions";
-import type { Student, StudentEdits } from "../../types/types";
-import { splitFullName, type NameParts } from "../../utils/splitFullName";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import type { StudentRecord, UpdateStudent } from "../../types/types";
 import { AnimatedModal } from "../ui/AnimatedModal";
+import { ErrorAlert } from "../ui/ErrorAlert";
 import { Icon } from "../ui/Icon";
-import { CONTROL_CLASS, Field, OptionSelect, SECONDARY_BUTTON_CLASS } from "./StudentFormControls";
+import { CONTROL_CLASS, Field, SECONDARY_BUTTON_CLASS } from "./StudentFormControls";
 
-interface FormState extends NameParts {
-  email: string;
-  yearLevel: YearLevel;
-}
-
-function createForm(student: Student | null): FormState {
-  if (student === null) {
-    return {
-      firstName: "",
-      middleName: "",
-      lastName: "",
-      email: "",
-      yearLevel: YEAR_LEVELS[0],
-    };
-  }
+function createForm(student: StudentRecord | null): UpdateStudent {
   return {
-    ...splitFullName(student.fullName),
-    email: student.email,
-    yearLevel: student.yearLevel,
+    firstName: student?.firstName ?? "",
+    middleName: student?.middleName ?? "",
+    lastName: student?.lastName ?? "",
   };
 }
 
 interface EditStudentModalProps {
   isOpen: boolean;
   /** Keep it set while the modal fades out, so the fields don't blank mid-animation. */
-  student: Student | null;
+  student: StudentRecord | null;
   onClose: () => void;
-  /** Called with the student number (the record's id) and the edited values. */
-  onUpdate: (studentNumber: string, edits: StudentEdits) => void;
+  /** Called with the id of the student being edited, plus the new name parts. Rejects on failure. */
+  onUpdate: (id: string, update: UpdateStudent) => Promise<void>;
 }
 
 export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStudentModalProps) {
@@ -48,45 +30,44 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
     firstName: `${baseId}-first-name`,
     middleName: `${baseId}-middle-name`,
     lastName: `${baseId}-last-name`,
-    program: `${baseId}-program`,
-    year: `${baseId}-year`,
-    email: `${baseId}-email`,
   };
 
-  const [form, setForm] = useState<FormState>(() => createForm(student));
+  const [form, setForm] = useState<UpdateStudent>(() => createForm(student));
+  const { run: save, isPending, error, reset: resetError } = useAsyncAction(onUpdate);
 
-  // The modal stays mounted so it can fade, so the form is reset during render
-  // whenever it opens or the target student changes (no effect needed).
+  // The modal stays mounted so it can fade, so the form is re-seeded during render whenever
+  // it opens or the target student changes. No effect needed.
   const [previous, setPrevious] = useState({ isOpen, student });
   if (previous.isOpen !== isOpen || previous.student !== student) {
     setPrevious({ isOpen, student });
     if (isOpen) setForm(createForm(student));
   }
 
-  const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
+  const updateField = <K extends keyof UpdateStudent>(key: K, value: UpdateStudent[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleClose = () => {
+    resetError();
+    onClose();
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (student === null) return;
+    if (student === null || isPending) return;
 
-    const fullName = [form.firstName, form.middleName, form.lastName]
-      .map((part) => part.trim())
-      .filter((part) => part !== "")
-      .join(" ");
-
-    onUpdate(student.studentId, {
-      fullName,
-      email: form.email.trim(),
-      yearLevel: form.yearLevel,
+    // On success the page closes the modal. On failure the error shows here and the form is kept.
+    await save(student.id, {
+      firstName: form.firstName.trim(),
+      middleName: form.middleName.trim(),
+      lastName: form.lastName.trim(),
     });
   };
 
   return (
     <AnimatedModal
       isOpen={isOpen}
-      onEscape={onClose}
+      onEscape={handleClose}
       labelledBy={ids.title}
       maxWidthClassName="max-w-lg"
     >
@@ -97,13 +78,13 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
           </h3>
           {student && (
             <p className="font-body-sm text-body-sm text-outline">
-              <span className="font-data-tabular">{student.studentId}</span>
+              <span className="font-data-tabular">{student.schoolId}</span>
             </p>
           )}
         </div>
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           aria-label="Close"
           className="p-1 rounded-md text-outline hover:text-on-surface"
         >
@@ -112,7 +93,7 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-space-md mt-space-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+        <fieldset disabled={isPending} className="grid min-w-0 grid-cols-1 gap-space-md sm:grid-cols-3">
           <Field htmlFor={ids.firstName} label="First Name">
             <input
               id={ids.firstName}
@@ -120,7 +101,7 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
               required
               autoComplete="given-name"
               value={form.firstName}
-              onChange={(event) => update("firstName", event.target.value)}
+              onChange={(event) => updateField("firstName", event.target.value)}
               className={CONTROL_CLASS}
             />
           </Field>
@@ -130,7 +111,7 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
               type="text"
               autoComplete="additional-name"
               value={form.middleName}
-              onChange={(event) => update("middleName", event.target.value)}
+              onChange={(event) => updateField("middleName", event.target.value)}
               className={CONTROL_CLASS}
             />
           </Field>
@@ -141,44 +122,24 @@ export function EditStudentModal({ isOpen, student, onClose, onUpdate }: EditStu
               required
               autoComplete="family-name"
               value={form.lastName}
-              onChange={(event) => update("lastName", event.target.value)}
+              onChange={(event) => updateField("lastName", event.target.value)}
               className={CONTROL_CLASS}
             />
           </Field>
-        </div>
+        </fieldset>
 
-        <div className="grid grid-cols-2 gap-space-md">
-          <Field htmlFor={ids.year} label="Year Level">
-            <OptionSelect
-              id={ids.year}
-              value={form.yearLevel}
-              options={YEAR_LEVELS}
-              isOption={isYearLevel}
-              onChange={(yearLevel) => update("yearLevel", yearLevel)}
-            />
-          </Field>
-        </div>
-
-        <Field htmlFor={ids.email} label="Email Address">
-          <input
-            id={ids.email}
-            type="email"
-            required
-            value={form.email}
-            onChange={(event) => update("email", event.target.value)}
-            className={CONTROL_CLASS}
-          />
-        </Field>
+        {error !== null && <ErrorAlert message={error} />}
 
         <div className="flex items-center justify-end gap-space-sm pt-space-sm">
-          <button type="button" onClick={onClose} className={SECONDARY_BUTTON_CLASS}>
+          <button type="button" onClick={handleClose} className={SECONDARY_BUTTON_CLASS}>
             Cancel
           </button>
           <button
             type="submit"
-            className="px-space-lg py-space-sm bg-primary-container text-on-primary font-title-sm text-body-sm font-semibold rounded-lg hover:bg-primary transition-colors"
+            disabled={isPending}
+            className="px-space-lg py-space-sm bg-primary-container text-on-primary font-title-sm text-body-sm font-semibold rounded-lg hover:bg-primary transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Save Changes
+            {isPending ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </form>
