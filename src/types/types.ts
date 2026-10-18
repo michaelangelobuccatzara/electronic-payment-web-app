@@ -286,3 +286,7 @@ export interface PromissoryRecord {
   /** Spelled this way by the API (sic): the staff member who handled the request. */
   cateredStaffFullName: string | null;
 }
+
+export interface ApprovePromissory {
+  amount: number;
+}

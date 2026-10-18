@@ -6,8 +6,8 @@ import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { Pagination } from "../components/ui/Pagination";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
-import type { PromissoryRecord } from "../types/types";
 import { ReviewDrawer } from "../components/promissory/ReviewDrawer";
+import type { ApprovePromissory, PromissoryRecord } from "../types/types";
 
 export function PromissoryNotes() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,6 +39,13 @@ export function PromissoryNotes() {
 
   const handleOpen = (note: PromissoryRecord) => setActiveId(note.id);
   const closeDrawer = () => setActiveId(null);
+
+  // Errors propagate to the drawer, which displays them. Close and refresh only on success.
+  const handleApprove = async (id: string, request: ApprovePromissory) => {
+    await promissoryService.approve(id, request);
+    closeDrawer();
+    reload();
+  };
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -105,7 +112,11 @@ export function PromissoryNotes() {
             />
           )}
         </div>
-        <ReviewDrawer promissoryId={activeId} onClose={closeDrawer} />
+        <ReviewDrawer
+          promissoryId={activeId}
+          onClose={closeDrawer}
+          onApprove={handleApprove}
+        />{" "}
         {data !== undefined && (
           <Pagination
             currentPage={data.page}
