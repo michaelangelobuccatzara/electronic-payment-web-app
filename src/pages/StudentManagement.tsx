@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { YearFilter } from "../data/studentOptions";
-import type { NewStudentDraft, Student, StudentEdits } from "../types/types";
+import type { NewStudentDraft } from "../types/types";
 import { AddStudentModal } from "../components/student/AddStudentModal";
 import { DeleteStudentModal } from "../components/student/DeleteStudentModal";
 import { StudentTable } from "../components/student/StudentTable";
@@ -8,6 +8,8 @@ import { StudentToolbar } from "../components/student/StudentToolbar";
 import { Icon } from "../components/ui/Icon";
 import { Pagination } from "../components/ui/Pagination";
 import { EditStudentModal } from "../components/student/EditStudentModal";
+import type { AddStudent, Student, StudentEdits } from "../types/types"; // NewStudentDraft → AddStudent
+import { studentService } from "../components/student/studentService";
 
 const PAGE_SIZE = 6;
 
@@ -67,13 +69,9 @@ export function StudentManagement({
     setIsDeleteOpen(false);
   };
 
-  const addStudent = (draft: NewStudentDraft) => {
-    const newStudent: Student = {
-      ...draft,
-      status: "enrolled",
-      balance: 0,
-    };
-    setStudents((previous) => [newStudent, ...previous]);
+  // replaces the old addStudent
+  const addStudent = async (student: AddStudent) => {
+    await studentService.addStudent(student); // a failure propagates to the modal, which shows it
     setIsAddOpen(false);
   };
   const openEditModal = (student: Student) => {

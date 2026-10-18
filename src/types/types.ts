@@ -1,4 +1,4 @@
-import type { YearLevel } from "../data/studentOptions";
+import type { StudentType, YearLevel } from "../data/studentOptions";
 import type {
   PaymentMethod,
   PaymentTransactionStatus,
@@ -215,4 +215,13 @@ export interface UpdateStaff {
   firstName: string;
   middleName: string;
   lastName: string;
+}
+
+export interface AddStudent {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  password: string;
+  studentType: StudentType;
+  rfid: string;
 }

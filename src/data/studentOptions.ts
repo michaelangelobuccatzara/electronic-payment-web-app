@@ -14,3 +14,17 @@ export function isYearLevel(value: string): value is YearLevel {
 export function isYearFilter(value: string): value is YearFilter {
   return value === "all" || isYearLevel(value);
 }
+
+export const STUDENT_TYPES = ["Kindergarten", "Elementary", "JuniorHigh", "SeniorHigh"] as const;
+export type StudentType = (typeof STUDENT_TYPES)[number];
+
+export const STUDENT_TYPE_LABELS: Record<StudentType, string> = {
+  Kindergarten: "Kindergarten",
+  Elementary: "Elementary",
+  JuniorHigh: "Junior High School",
+  SeniorHigh: "Senior High School",
+};
+
+export function isStudentType(value: string): value is StudentType {
+  return STUDENT_TYPES.some((type) => type === value);
+}
