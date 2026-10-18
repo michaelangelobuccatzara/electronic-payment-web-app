@@ -15,4 +15,9 @@ export const promissoryService = {
     });
     return data;
   },
+
+  async getById(id: string, signal?: AbortSignal): Promise<PromissoryRecord> {
+  const { data } = await apiClient.get<PromissoryRecord>(`/promissories/${id}`, { signal });
+  return data;
+},
 };

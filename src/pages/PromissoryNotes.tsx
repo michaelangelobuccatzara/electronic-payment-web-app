@@ -7,6 +7,7 @@ import { Pagination } from "../components/ui/Pagination";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import type { PromissoryRecord } from "../types/types";
+import { ReviewDrawer } from "../components/promissory/ReviewDrawer";
 
 export function PromissoryNotes() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,18 +23,22 @@ export function PromissoryNotes() {
   }
 
   const fetchNotes = useCallback(
-    (signal: AbortSignal) => promissoryService.getPagination(currentPage, searchTerm, signal),
+    (signal: AbortSignal) =>
+      promissoryService.getPagination(currentPage, searchTerm, signal),
     [currentPage, searchTerm],
   );
   const { data, error, isLoading, reload } = useApiQuery(fetchNotes);
 
-  const rangeStart = data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
-  const rangeEnd = data ? Math.min(data.page * data.pageSize, data.totalCount) : 0;
+  const rangeStart =
+    data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const rangeEnd = data
+    ? Math.min(data.page * data.pageSize, data.totalCount)
+    : 0;
 
-  // Placeholder until the details, approve and reject endpoints are wired.
-  const handleOpen = (_note: PromissoryRecord) => {
-    // TODO: open the review drawer for this note.
-  };
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const handleOpen = (note: PromissoryRecord) => setActiveId(note.id);
+  const closeDrawer = () => setActiveId(null);
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
@@ -49,7 +54,10 @@ export function PromissoryNotes() {
 
         <div className="flex items-center gap-space-md self-start md:self-auto bg-surface-container-low p-space-sm rounded-lg">
           <div className="flex items-center gap-space-sm px-space-md py-space-xs bg-surface-container-lowest rounded-xs shadow-xs">
-            <div aria-hidden="true" className="w-2 h-8 rounded-full bg-tertiary-container" />
+            <div
+              aria-hidden="true"
+              className="w-2 h-8 rounded-full bg-tertiary-container"
+            />
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm uppercase text-outline">
                 Total Requests
@@ -62,7 +70,10 @@ export function PromissoryNotes() {
         </div>
       </div>
 
-      <PromissoryToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <PromissoryToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {error !== null && <ErrorAlert message={error} onRetry={reload} />}
 
@@ -75,7 +86,10 @@ export function PromissoryNotes() {
         >
           {data === undefined ? (
             isLoading && (
-              <p role="status" className="p-space-lg font-body-md text-body-md text-on-surface-variant">
+              <p
+                role="status"
+                className="p-space-lg font-body-md text-body-md text-on-surface-variant"
+              >
                 Loading promissory notes…
               </p>
             )
@@ -83,12 +97,15 @@ export function PromissoryNotes() {
             <PromissoryTable
               notes={data.items}
               emptyMessage={
-                searchTerm === "" ? "No promissory notes yet." : "No promissory notes match your search."
+                searchTerm === ""
+                  ? "No promissory notes yet."
+                  : "No promissory notes match your search."
               }
               onOpen={handleOpen}
             />
           )}
         </div>
+        <ReviewDrawer promissoryId={activeId} onClose={closeDrawer} />
         {data !== undefined && (
           <Pagination
             currentPage={data.page}
