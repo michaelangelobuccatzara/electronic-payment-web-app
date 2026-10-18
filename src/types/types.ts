@@ -273,3 +273,16 @@ export interface AddGradingPeriod {
 }
 
 export type UpdateGradingPeriod = AddGradingPeriod;
+
+export interface PromissoryRecord {
+  id: string;
+  note: string | null;
+  currentBalance: number;
+  approvedAmount: number | null;
+  status: PromissoryStatus;
+  createdAt: string;
+  lastModifiedAt: string | null;
+  studentFullName: string;
+  /** Spelled this way by the API (sic): the staff member who handled the request. */
+  cateredStaffFullName: string | null;
+}

@@ -31,3 +31,14 @@ export const STATUS_FILTER_OPTIONS: readonly { value: PromissoryStatusFilter; la
     label: PROMISSORY_STATUS_META[status].label,
   })),
 ];
+
+export function isPromissoryStatus(value: string): value is PromissoryStatus {
+  return PROMISSORY_STATUSES.some((status) => status === value);
+}
+
+/** Safe for API data: an unknown status shows as a neutral badge instead of crashing the table. */
+export function getPromissoryStatusMeta(status: string): PromissoryStatusMeta {
+  return isPromissoryStatus(status)
+    ? PROMISSORY_STATUS_META[status]
+    : { label: status, tone: "neutral" };
+}

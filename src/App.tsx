@@ -10,15 +10,7 @@ import {
 } from "./data/dashboardSample";
 import { StudentManagement } from "./pages/StudentManagement";
 import { GradingPeriods } from "./pages/GradingPeriods";
-import {
-  SAMPLE_GRADING_PERIODS,
-  SAMPLE_GRADING_SUMMARY,
-} from "./data/gradingPeriodSample";
 import { PromissoryNotes } from "./pages/PromissoryNotes";
-import {
-  SAMPLE_PROMISSORY_NOTES,
-  SAMPLE_PROMISSORY_SUMMARY,
-} from "./data/promissorySample";
 import { Payments } from "./pages/Payments";
 import {
   SAMPLE_PAYMENT_TRANSACTIONS,
@@ -80,10 +72,7 @@ function App() {
                 path={ROUTE_PATHS.promissoryNotes}
                 element={
                   <ProtectedRoute roles={["Admin", "Treasurer"]}>
-                    <PromissoryNotes
-                      initialNotes={SAMPLE_PROMISSORY_NOTES}
-                      summary={SAMPLE_PROMISSORY_SUMMARY}
-                    />
+                    <PromissoryNotes />
                   </ProtectedRoute>
                 }
               />

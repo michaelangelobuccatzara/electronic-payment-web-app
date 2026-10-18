@@ -1,4 +1,5 @@
-import type { PromissoryNote, PromissoryNotesSummary } from "../types/types";
+import type { PromissoryNote, PromissoryNotesSummary, PromissoryStatus } from "../types/types";
+import { PROMISSORY_STATUS_META, PROMISSORY_STATUSES, type PromissoryStatusMeta } from "./promissoryOptions";
 
 // Sample data copied from the Stitch design. Replace with real data when available.
 export const SAMPLE_PROMISSORY_SUMMARY: PromissoryNotesSummary = {
@@ -15,7 +16,7 @@ export const SAMPLE_PROMISSORY_NOTES: readonly PromissoryNote[] = [
     yearLevel: "2nd Yr",
     submissionDate: "Mar 02, 2025",
     amountDue: 14200,
-    status: "pending",
+    status: "Pending",
     deferralReason:
       "Delayed family remittance from OFW parent based in Dubai due to overseas company payroll cycle adjustment. Remittance scheduled for arrival on March 25th.",
   },
@@ -25,3 +26,14 @@ export const SAMPLE_PROMISSORY_NOTES: readonly PromissoryNote[] = [
   { requestId: "PN-2025-0137", studentName: "Dave Russell Perez", studentNumber: "2022-00914", program: "BS Psychology", yearLevel: "3rd Yr", submissionDate: "Feb 26, 2025", amountDue: 15000, status: "rejected" },
   { requestId: "PN-2025-0135", studentName: "Sarah Jane Ocampo", studentNumber: "2023-00512", program: "BS Information Technology", yearLevel: "2nd Yr", submissionDate: "Feb 25, 2025", amountDue: 9800, status: "approved" },
 ];
+
+export function isPromissoryStatus(value: string): value is PromissoryStatus {
+  return PROMISSORY_STATUSES.some((status) => status === value);
+}
+
+/** Safe for API data: an unknown status shows as a neutral badge instead of crashing the table. */
+export function getPromissoryStatusMeta(status: string): PromissoryStatusMeta {
+  return isPromissoryStatus(status)
+    ? PROMISSORY_STATUS_META[status]
+    : { label: status, tone: "neutral" };
+}

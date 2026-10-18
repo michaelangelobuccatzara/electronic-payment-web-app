@@ -1,65 +1,44 @@
-import { useState } from "react";
-import type { PromissoryStatusFilter } from "../data/promissoryOptions";
-import type { PromissoryNote, PromissoryNotesSummary } from "../types/types";
-import { Pagination } from "../components/ui/Pagination";
+import { useCallback, useState } from "react";
 import { PromissoryTable } from "../components/promissory/PromissoryTable";
 import { PromissoryToolbar } from "../components/promissory/PromissoryToolbar";
-import { ReviewDrawer } from "../components/promissory/ReviewDrawer";
-import { Icon } from "../components/ui/Icon";
+import { promissoryService } from "../components/promissory/promissoryService";
+import { ErrorAlert } from "../components/ui/ErrorAlert";
+import { Pagination } from "../components/ui/Pagination";
+import { useApiQuery } from "../hooks/useApiQuery";
+import { useDebouncedValue } from "../hooks/useDebouncedValue";
+import type { PromissoryRecord } from "../types/types";
 
-const PAGE_SIZE = 6;
-
-interface PromissoryNotesProps {
-  /** Seed data. The page edits its own copy in memory until a data source exists. */
-  initialNotes: readonly PromissoryNote[];
-  summary: PromissoryNotesSummary;
-}
-
-export function PromissoryNotes({
-  initialNotes,
-  summary,
-}: PromissoryNotesProps) {
-  const [notes, setNotes] = useState<readonly PromissoryNote[]>(initialNotes);
-  const [statusFilter, setStatusFilter] =
-    useState<PromissoryStatusFilter>("all");
+export function PromissoryNotes() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Derived during render: no extra state or effects.
-  const query = searchQuery.trim().toLowerCase();
-  const visibleNotes = notes.filter((note) => {
-    const matchesStatus =
-      statusFilter === "all" || note.status === statusFilter;
-    const matchesSearch =
-      query === "" ||
-      note.requestId.toLowerCase().includes(query) ||
-      note.studentName.toLowerCase().includes(query) ||
-      note.studentNumber.toLowerCase().includes(query);
-    return matchesStatus && matchesSearch;
-  });
-  const activeNote = notes.find((note) => note.requestId === activeId) ?? null;
+  const searchTerm = useDebouncedValue(searchQuery.trim(), 300);
 
-  const totalPages = Math.ceil(summary.totalRequests / PAGE_SIZE);
-  const rangeStart = (currentPage - 1) * PAGE_SIZE + 1;
-  const rangeEnd = Math.min(currentPage * PAGE_SIZE, summary.totalRequests);
+  // A new search starts from page 1 (adjusted during render, so no extra request fires).
+  const [pageSearchTerm, setPageSearchTerm] = useState(searchTerm);
+  if (pageSearchTerm !== searchTerm) {
+    setPageSearchTerm(searchTerm);
+    setCurrentPage(1);
+  }
 
-  const closeDrawer = () => setActiveId(null);
+  const fetchNotes = useCallback(
+    (signal: AbortSignal) => promissoryService.getPagination(currentPage, searchTerm, signal),
+    [currentPage, searchTerm],
+  );
+  const { data, error, isLoading, reload } = useApiQuery(fetchNotes);
 
-  const updateActive = (changes: Partial<PromissoryNote>) => {
-    setNotes((previous) =>
-      previous.map((note) =>
-        note.requestId === activeId ? { ...note, ...changes } : note,
-      ),
-    );
-    closeDrawer();
+  const rangeStart = data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const rangeEnd = data ? Math.min(data.page * data.pageSize, data.totalCount) : 0;
+
+  // Placeholder until the details, approve and reject endpoints are wired.
+  const handleOpen = (_note: PromissoryRecord) => {
+    // TODO: open the review drawer for this note.
   };
 
   return (
     <div className="flex flex-col w-full gap-space-lg">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md bg-surface-container-lowest p-space-lg rounded-xl shadow-xs">
         <div className="flex flex-col">
-          <div className="flex items-center gap-space-xs text-secondary mb-1"></div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">
             Promissory Notes
           </h1>
@@ -70,60 +49,58 @@ export function PromissoryNotes({
 
         <div className="flex items-center gap-space-md self-start md:self-auto bg-surface-container-low p-space-sm rounded-lg">
           <div className="flex items-center gap-space-sm px-space-md py-space-xs bg-surface-container-lowest rounded-xs shadow-xs">
-            <div
-              aria-hidden="true"
-              className="w-2 h-8 rounded-full bg-tertiary-container"
-            />
+            <div aria-hidden="true" className="w-2 h-8 rounded-full bg-tertiary-container" />
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm uppercase text-outline">
-                Action Required
+                Total Requests
               </span>
               <span className="font-headline-md text-headline-md font-bold text-on-surface font-data-tabular">
-                {summary.pendingCount} Pending
+                {data?.totalCount ?? "—"}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <PromissoryToolbar
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
+      <PromissoryToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+
+      {error !== null && <ErrorAlert message={error} onRetry={reload} />}
 
       <div className="bg-surface-container-lowest rounded-xl shadow-xs overflow-hidden flex flex-col">
-        <div className="overflow-x-auto w-full">
-          <PromissoryTable
-            notes={visibleNotes}
-            onOpen={(note) => setActiveId(note.requestId)}
-          />
+        <div
+          aria-busy={isLoading}
+          className={`overflow-x-auto w-full transition-opacity ${
+            isLoading && data !== undefined ? "opacity-60" : ""
+          }`}
+        >
+          {data === undefined ? (
+            isLoading && (
+              <p role="status" className="p-space-lg font-body-md text-body-md text-on-surface-variant">
+                Loading promissory notes…
+              </p>
+            )
+          ) : (
+            <PromissoryTable
+              notes={data.items}
+              emptyMessage={
+                searchTerm === "" ? "No promissory notes yet." : "No promissory notes match your search."
+              }
+              onOpen={handleOpen}
+            />
+          )}
         </div>
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          totalItems={summary.totalRequests}
-          itemLabel="requests"
-          onPageChange={setCurrentPage}
-        />
+        {data !== undefined && (
+          <Pagination
+            currentPage={data.page}
+            totalPages={data.totalPages}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            totalItems={data.totalCount}
+            itemLabel="requests"
+            onPageChange={setCurrentPage}
+          />
+        )}
       </div>
-
-      {/* `key` remounts the drawer per note, so its notes field starts empty each time. */}
-      <ReviewDrawer
-        key={activeNote?.requestId ?? "closed"}
-        note={activeNote}
-        onClose={closeDrawer}
-        onApprove={() => updateActive({ status: "approved" })}
-        onReject={(reason) =>
-          updateActive({
-            status: "rejected",
-            rejectionReason: reason || undefined,
-          })
-        }
-      />
     </div>
   );
 }
