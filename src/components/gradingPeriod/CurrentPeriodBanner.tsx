@@ -19,7 +19,7 @@ export function CurrentPeriodBanner({ semester }: CurrentPeriodBannerProps) {
         </div>
         <div className="flex flex-col">
           <h2 className="font-title-sm text-title-sm md:text-headline-md text-on-surface font-bold tracking-tight mt-1">
-            {formatAcademicYear(semester.schoolYearFrom, semester.schoolYearTo)} • {semester.name}
+            {formatAcademicYear(semester.schoolYearFrom, semester.schoolYearTo)} • {semester.name} Semester
           </h2>
         </div>
       </div>
