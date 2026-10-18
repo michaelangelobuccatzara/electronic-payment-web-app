@@ -290,3 +290,7 @@ export interface PromissoryRecord {
 export interface ApprovePromissory {
   amount: number;
 }
+
+export interface RejectPromissory {
+  reasonOfRejection: string;
+}

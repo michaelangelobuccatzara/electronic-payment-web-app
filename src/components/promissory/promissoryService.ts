@@ -1,5 +1,10 @@
 import { apiClient } from "../../api/axiosInstrance";
-import type { ApprovePromissory, PagedResult, PromissoryRecord } from "../../types/types";
+import type {
+  ApprovePromissory,
+  PagedResult,
+  PromissoryRecord,
+  RejectPromissory,
+} from "../../types/types";
 
 const PAGE_SIZE = 10;
 
@@ -32,6 +37,10 @@ export const promissoryService = {
   },
 
   async approve(id: string, request: ApprovePromissory): Promise<void> {
-  await apiClient.post(`/promissories/${id}/approve`, request);
-},
+    await apiClient.post(`/promissories/${id}/approve`, request);
+  },
+
+  async reject(id: string, request: RejectPromissory): Promise<void> {
+    await apiClient.post(`/promissories/${id}/reject`, request);
+  },
 };

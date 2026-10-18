@@ -7,7 +7,11 @@ import { Pagination } from "../components/ui/Pagination";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { ReviewDrawer } from "../components/promissory/ReviewDrawer";
-import type { ApprovePromissory, PromissoryRecord } from "../types/types";
+import type {
+  ApprovePromissory,
+  PromissoryRecord,
+  RejectPromissory,
+} from "../types/types";
 
 export function PromissoryNotes() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +47,12 @@ export function PromissoryNotes() {
   // Errors propagate to the drawer, which displays them. Close and refresh only on success.
   const handleApprove = async (id: string, request: ApprovePromissory) => {
     await promissoryService.approve(id, request);
+    closeDrawer();
+    reload();
+  };
+
+  const handleReject = async (id: string, request: RejectPromissory) => {
+    await promissoryService.reject(id, request);
     closeDrawer();
     reload();
   };
@@ -116,6 +126,7 @@ export function PromissoryNotes() {
           promissoryId={activeId}
           onClose={closeDrawer}
           onApprove={handleApprove}
+          onReject={handleReject}
         />{" "}
         {data !== undefined && (
           <Pagination
