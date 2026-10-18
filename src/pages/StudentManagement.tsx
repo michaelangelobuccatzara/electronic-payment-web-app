@@ -10,6 +10,7 @@ import { useApiQuery } from "../hooks/useApiQuery";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import { EditStudentModal } from "../components/student/EditStudentModal";
 import type { AddStudent, StudentRecord, UpdateStudent } from "../types/types";
+import { DeleteStudentModal } from "../components/student/DeleteStudentModal";
 
 export function StudentManagement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,10 +58,30 @@ export function StudentManagement() {
     reload();
   };
 
-  const handleDelete = (_student: StudentRecord) => {
-    // TODO: open the delete confirmation (DELETE /students/{id}).
-  };
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  // Stays set after closing, so the modal keeps its content while it fades out.
+  const [studentToDelete, setStudentToDelete] = useState<StudentRecord | null>(
+    null,
+  );
 
+  const requestDelete = (student: StudentRecord) => {
+    setStudentToDelete(student);
+    setIsDeleteOpen(true);
+  };
+  const closeDeleteModal = () => setIsDeleteOpen(false);
+
+  const handleConfirmDelete = async () => {
+    if (studentToDelete === null) return;
+    await studentService.deleteStudent(studentToDelete.id);
+    closeDeleteModal();
+
+    // Removing the only row on the last page would leave an empty page.
+    if (data !== undefined && data.items.length === 1 && currentPage > 1) {
+      setCurrentPage(currentPage - 1); // changes the query, which refetches by itself
+    } else {
+      reload();
+    }
+  };
   // Errors propagate to the modal, which displays them. Close and refresh only on success.
   const handleUpdate = async (id: string, update: UpdateStudent) => {
     await studentService.updateStudent(id, update);
@@ -127,7 +148,7 @@ export function StudentManagement() {
                   : "No students match your search."
               }
               onEdit={openEditModal}
-              onDelete={handleDelete}
+              onDelete={requestDelete}
             />
           )}
         </div>
@@ -156,6 +177,13 @@ export function StudentManagement() {
         student={studentToEdit}
         onClose={closeEditModal}
         onUpdate={handleUpdate}
+      />
+
+      <DeleteStudentModal
+        isOpen={isDeleteOpen}
+        student={studentToDelete}
+        onCancel={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

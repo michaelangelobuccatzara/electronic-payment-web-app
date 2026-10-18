@@ -31,8 +31,12 @@ export const studentService = {
   async addStudent(student: AddStudent): Promise<void> {
     await apiClient.post("/students", student);
   },
-  
+
   async updateStudent(id: string, student: UpdateStudent): Promise<void> {
     await apiClient.put(`/students/${id}`, student);
+  },
+
+  async deleteStudent(id: string): Promise<void> {
+    await apiClient.delete(`/users/${id}`);
   },
 };
