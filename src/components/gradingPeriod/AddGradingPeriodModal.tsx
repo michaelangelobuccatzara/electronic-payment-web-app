@@ -1,6 +1,8 @@
 import { useId, useState, type FormEvent } from "react";
-import type { NewGradingPeriodDraft } from "../../types/types";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import type { AddGradingPeriod } from "../../types/types";
 import { AnimatedModal } from "../ui/AnimatedModal";
+import { ErrorAlert } from "../ui/ErrorAlert";
 import { Icon } from "../ui/Icon";
 // Field lives with the Students screen for now; see the cleanup note about moving it to ui/.
 import { Field } from "../student/StudentFormControls";
@@ -14,59 +16,79 @@ import {
 const INPUT_CLASS =
   "w-full px-3 py-2 rounded-lg bg-surface-container-low text-on-surface text-body-sm focus:outline-hidden";
 
-function createInitialForm(): NewGradingPeriodDraft {
-  return {
-    title: "",
-    chargeDueDate: "",
-  };
+// The sequence is kept as a string while typing (an empty box is a valid in-between state)
+// and converted to a number on submit.
+interface FormState {
+  name: string;
+  chargeDueDate: string;
+  sequence: string;
+}
+
+function createInitialForm(nextSequence: number): FormState {
+  return { name: "", chargeDueDate: "", sequence: String(nextSequence) };
 }
 
 interface AddGradingPeriodModalProps {
   isOpen: boolean;
-  defaultAcademicYear: string;
+  /** Suggested sequence: one after the highest existing period. */
+  nextSequence: number;
   onClose: () => void;
-  onSave: (draft: NewGradingPeriodDraft) => void;
+  /** Rejects on failure; the modal shows the error and stays open. */
+  onSave: (period: AddGradingPeriod) => Promise<void>;
 }
 
 export function AddGradingPeriodModal({
   isOpen,
+  nextSequence,
   onClose,
   onSave,
 }: AddGradingPeriodModalProps) {
   const baseId = useId();
   const ids = {
     title: `${baseId}-title`,
-    year: `${baseId}-year`,
     name: `${baseId}-name`,
-    chargeDueDate: `${baseId}-start`,
+    chargeDueDate: `${baseId}-charge-due-date`,
+    sequence: `${baseId}-sequence`,
+    sequenceHint: `${baseId}-sequence-hint`,
   };
 
-  const [form, setForm] = useState<NewGradingPeriodDraft>(() =>
-    createInitialForm(),
-  );
+  const [form, setForm] = useState<FormState>(() => createInitialForm(nextSequence));
+  const { run: save, isPending, error, reset: resetError } = useAsyncAction(onSave);
 
-  const update = <K extends keyof NewGradingPeriodDraft>(
-    key: K,
-    value: NewGradingPeriodDraft[K],
-  ) => {
+  // The modal stays mounted so it can fade. Each time it opens, start from a clean form
+  // (using the up-to-date suggested sequence) and clear any old error. No effect needed.
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) {
+    setWasOpen(isOpen);
+    if (isOpen) {
+      setForm(createInitialForm(nextSequence));
+      resetError();
+    }
+  }
+
+  const update = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((previous) => ({ ...previous, [key]: value }));
   };
 
-  const handleClose = () => {
-    setForm(createInitialForm());
-    onClose();
-  };
-
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSave({ ...form, title: form.title.trim() });
-    setForm(createInitialForm());
+    if (isPending) return;
+
+    const sequence = Number.parseInt(form.sequence, 10);
+    if (!Number.isSafeInteger(sequence) || sequence < 1) return; // the pattern below normally prevents this
+
+    // On success the page closes the modal. On failure the error shows here and the form is kept.
+    await save({
+      name: form.name.trim(),
+      chargeDueDate: form.chargeDueDate,
+      sequence,
+    });
   };
 
   return (
     <AnimatedModal
       isOpen={isOpen}
-      onEscape={handleClose}
+      onEscape={onClose}
       labelledBy={ids.title}
       maxWidthClassName="max-w-md"
       overlayClassName={MODAL_OVERLAY_CLASS}
@@ -81,7 +103,7 @@ export function AddGradingPeriodModal({
         </div>
         <button
           type="button"
-          onClick={handleClose}
+          onClick={onClose}
           aria-label="Close"
           className="text-outline hover:text-on-surface transition-colors"
         >
@@ -90,15 +112,15 @@ export function AddGradingPeriodModal({
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col">
-        <div className="p-space-lg flex flex-col gap-space-md">
+        <fieldset disabled={isPending} className="flex min-w-0 flex-col gap-space-md p-space-lg">
           <Field htmlFor={ids.name} label="Period / Milestone Title">
             <input
               id={ids.name}
               type="text"
               required
-              value={form.title}
-              onChange={(event) => update("title", event.target.value)}
-              placeholder="e.g. Summer Term - Final Exams"
+              value={form.name}
+              onChange={(event) => update("name", event.target.value)}
+              placeholder="e.g. Midterm"
               className={INPUT_CLASS}
             />
           </Field>
@@ -114,16 +136,44 @@ export function AddGradingPeriodModal({
                 className={INPUT_CLASS}
               />
             </Field>
-          </div>
 
-        </div>
+            <Field htmlFor={ids.sequence} label="Sequence">
+              <input
+                id={ids.sequence}
+                type="text"
+                inputMode="numeric"
+                required
+                pattern="[1-9][0-9]*"
+                title="Enter a whole number, 1 or higher"
+                aria-describedby={ids.sequenceHint}
+                value={form.sequence}
+                // Digits only, even when pasted.
+                onChange={(event) => update("sequence", event.target.value.replace(/\D/g, ""))}
+                className={INPUT_CLASS}
+              />
+              <span id={ids.sequenceHint} className="font-body-sm text-body-sm text-outline">
+                Order within the semester (1 = first).
+              </span>
+            </Field>
+          </div>
+        </fieldset>
+
+        {error !== null && (
+          <div className="px-space-lg pb-space-md">
+            <ErrorAlert message={error} />
+          </div>
+        )}
 
         <div className="p-space-md bg-surface-container-low flex items-center justify-end gap-space-sm">
-          <button type="button" onClick={handleClose} className={CANCEL_BUTTON_CLASS}>
+          <button type="button" onClick={onClose} className={CANCEL_BUTTON_CLASS}>
             Cancel
           </button>
-          <button type="submit" className={PRIMARY_BUTTON_CLASS}>
-            Save Period
+          <button
+            type="submit"
+            disabled={isPending}
+            className={`${PRIMARY_BUTTON_CLASS} disabled:cursor-not-allowed disabled:opacity-60`}
+          >
+            {isPending ? "Saving…" : "Save Period"}
           </button>
         </div>
       </form>

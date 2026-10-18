@@ -9,15 +9,20 @@ import { TermsStatCard } from "../components/gradingPeriod/TermsStatCard";
 import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { Icon } from "../components/ui/Icon";
 import { useApiQuery } from "../hooks/useApiQuery";
-import type { GradingPeriodRecord } from "../types/types";
 import { formatAcademicYear } from "../utils/gradingPeriod";
+import type { AddGradingPeriod, GradingPeriodRecord } from "../types/types";
 
 export function GradingPeriods() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   // `getCurrent` is a stable reference, so it can be passed directly.
-  const { data: semester, error, isLoading, reload } = useApiQuery(semesterService.getCurrent);
+  const {
+    data: semester,
+    error,
+    isLoading,
+    reload,
+  } = useApiQuery(semesterService.getCurrent);
 
   // Derived during render: no extra state or effects.
   const periods = semester
@@ -32,14 +37,28 @@ export function GradingPeriods() {
       ? periods
       : periods.filter(
           (period) =>
-            period.name.toLowerCase().includes(query) || period.chargeDueDate.includes(query),
+            period.name.toLowerCase().includes(query) ||
+            period.chargeDueDate.includes(query),
         );
 
-  const closeAddModal = () => setIsAddOpen(false);
   // Placeholders until the POST and PUT endpoints are wired.
-  const handleSavePeriod = () => closeAddModal();
   const handleEdit = (_period: GradingPeriodRecord) => {
     // TODO: open the edit modal for this period.
+  };
+
+  const nextSequence =
+    periods.reduce((highest, period) => Math.max(highest, period.sequence), 0) +
+    1;
+
+  const closeAddModal = () => setIsAddOpen(false);
+
+  // Errors propagate to the modal, which displays them. Close and refresh only on success.
+  const handleSavePeriod = async (period: AddGradingPeriod) => {
+    if (semester === undefined)
+      throw new Error("The current semester hasn't loaded yet.");
+    await semesterService.addGradingPeriod(semester.id, period);
+    closeAddModal();
+    reload();
   };
 
   return (
@@ -50,8 +69,13 @@ export function GradingPeriods() {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">
               Academic Schedule Governance
             </span>
-            <span aria-hidden="true" className="w-1 h-1 rounded-full bg-outline" />
-            <span className="font-label-sm text-label-sm text-outline">Institutional Configuration</span>
+            <span
+              aria-hidden="true"
+              className="w-1 h-1 rounded-full bg-outline"
+            />
+            <span className="font-label-sm text-label-sm text-outline">
+              Institutional Configuration
+            </span>
           </div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
             Grading Periods
@@ -61,8 +85,9 @@ export function GradingPeriods() {
           <button
             type="button"
             onClick={() => setIsAddOpen(true)}
+            disabled={semester === undefined}
             aria-haspopup="dialog"
-            className={`inline-flex items-center gap-space-xs ${PRIMARY_BUTTON_CLASS}`}
+            className={`inline-flex items-center gap-space-xs ${PRIMARY_BUTTON_CLASS} disabled:cursor-not-allowed disabled:opacity-60`}
           >
             <Icon name="add_circle" className="text-body-md" />
             <span>Add Grading Period</span>
@@ -74,7 +99,10 @@ export function GradingPeriods() {
 
       {semester === undefined ? (
         isLoading && (
-          <p role="status" className="font-body-md text-body-md text-on-surface-variant">
+          <p
+            role="status"
+            className="font-body-md text-body-md text-on-surface-variant"
+          >
             Loading current semester…
           </p>
         )
@@ -83,11 +111,18 @@ export function GradingPeriods() {
           <CurrentPeriodBanner semester={semester} />
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md">
-            <TermsStatCard label="Configured Terms" value={periods.length} badge={academicYear} />
+            <TermsStatCard
+              label="Configured Terms"
+              value={periods.length}
+              badge={academicYear}
+            />
           </div>
 
           <div className="bg-surface-container-lowest rounded-xl shadow-xs flex flex-col overflow-hidden">
-            <PeriodToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            <PeriodToolbar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
             <div
               aria-busy={isLoading}
               className={`overflow-x-auto w-full transition-opacity ${isLoading ? "opacity-60" : ""}`}
@@ -107,7 +142,8 @@ export function GradingPeriods() {
               <div className="flex items-center gap-space-xs">
                 <Icon name="info" className="text-body-md text-outline" />
                 <p>
-                  Showing {visiblePeriods.length} of {periods.length} registered grading windows
+                  Showing {visiblePeriods.length} of {periods.length} registered
+                  grading windows
                 </p>
               </div>
             </div>
@@ -117,7 +153,7 @@ export function GradingPeriods() {
 
       <AddGradingPeriodModal
         isOpen={isAddOpen}
-        defaultAcademicYear={academicYear}
+        nextSequence={nextSequence}
         onClose={closeAddModal}
         onSave={handleSavePeriod}
       />

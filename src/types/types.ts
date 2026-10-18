@@ -264,3 +264,10 @@ export interface CurrentSemester {
   createdAt: string;
   gradingPeriods: GradingPeriodRecord[];
 }
+
+export interface AddGradingPeriod {
+  name: string;
+  /** "YYYY-MM-DD", straight from <input type="date">. */
+  chargeDueDate: string;
+  sequence: number;
+}
