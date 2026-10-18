@@ -72,10 +72,7 @@ function App() {
                 path={ROUTE_PATHS.gradingPeriods}
                 element={
                   <ProtectedRoute roles={["Admin"]}>
-                    <GradingPeriods
-                      periods={SAMPLE_GRADING_PERIODS}
-                      summary={SAMPLE_GRADING_SUMMARY}
-                    />
+                    <GradingPeriods />
                   </ProtectedRoute>
                 }
               />

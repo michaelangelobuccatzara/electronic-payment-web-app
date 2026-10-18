@@ -242,3 +242,25 @@ export interface UpdateStudent {
   middleName: string;
   lastName: string;
 }
+
+export interface GradingPeriodRecord {
+  id: string;
+  name: string;
+  /** Date only, "YYYY-MM-DD". */
+  chargeDueDate: string;
+  sequence: number;
+  semesterId: string;
+  /** Spelled this way by the API (sic). The UI doesn't use it. */
+  craetedAt: string;
+  lastModifiedAt: string | null;
+}
+
+export interface CurrentSemester {
+  id: string;
+  /** e.g. "1ST" */
+  name: string;
+  schoolYearFrom: number;
+  schoolYearTo: number;
+  createdAt: string;
+  gradingPeriods: GradingPeriodRecord[];
+}

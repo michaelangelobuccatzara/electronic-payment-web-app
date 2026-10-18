@@ -17,3 +17,8 @@ export function toDateInputValue(value: string): string {
   const day = String(parsed.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+/** (2026, 2027) -> "AY 2026–2027" */
+export function formatAcademicYear(from: number, to: number): string {
+  return `AY ${from}–${to}`;
+}

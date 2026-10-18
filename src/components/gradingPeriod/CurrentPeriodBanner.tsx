@@ -1,14 +1,15 @@
-import type { GradingPeriod } from "../../types/types";
+import type { CurrentSemester } from "../../types/types";
+import { formatAcademicYear } from "../../utils/gradingPeriod";
 import { Icon } from "../ui/Icon";
 
 interface CurrentPeriodBannerProps {
-  period: GradingPeriod;
+  semester: CurrentSemester;
 }
 
-export function CurrentPeriodBanner({ period }: CurrentPeriodBannerProps) {
+export function CurrentPeriodBanner({ semester }: CurrentPeriodBannerProps) {
   return (
     <section
-      aria-label="Current grading period"
+      aria-label="Current semester"
       className="relative overflow-hidden rounded-xl bg-surface-container-lowest shadow-xs p-space-lg flex flex-col md:flex-row md:items-center justify-between gap-space-md"
     >
       <div aria-hidden="true" className="absolute left-0 top-0 bottom-0 w-1.5 bg-primary-container" />
@@ -18,7 +19,7 @@ export function CurrentPeriodBanner({ period }: CurrentPeriodBannerProps) {
         </div>
         <div className="flex flex-col">
           <h2 className="font-title-sm text-title-sm md:text-headline-md text-on-surface font-bold tracking-tight mt-1">
-            {period.academicYear} • {period.semester} ({period.milestone})
+            {formatAcademicYear(semester.schoolYearFrom, semester.schoolYearTo)} • {semester.name}
           </h2>
         </div>
       </div>

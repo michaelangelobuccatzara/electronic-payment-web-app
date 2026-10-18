@@ -1,71 +1,45 @@
 import { useState } from "react";
-import {
-  DEFAULT_ACADEMIC_YEAR_FILTER,
-  type AcademicYearFilter,
-} from "../data/gradingPeriodOptions";
-import type { GradingPeriod, GradingPeriodsSummary } from "../types/types";
-import { getPeriodName } from "../utils/gradingPeriod";
 import { AddGradingPeriodModal } from "../components/gradingPeriod/AddGradingPeriodModal";
 import { CurrentPeriodBanner } from "../components/gradingPeriod/CurrentPeriodBanner";
 import { PeriodTable } from "../components/gradingPeriod/PeriodTable";
 import { PeriodToolbar } from "../components/gradingPeriod/PeriodToolbar";
 import { PRIMARY_BUTTON_CLASS } from "../components/gradingPeriod/periodStyles";
+import { semesterService } from "../components/gradingPeriod/semesterService";
 import { TermsStatCard } from "../components/gradingPeriod/TermsStatCard";
+import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { Icon } from "../components/ui/Icon";
-import { EditGradingPeriodModal } from "../components/gradingPeriod/EditGradingPeriodModal";
-import type { NewGradingPeriodDraft } from "../types/types";
+import { useApiQuery } from "../hooks/useApiQuery";
+import type { GradingPeriodRecord } from "../types/types";
+import { formatAcademicYear } from "../utils/gradingPeriod";
 
-interface GradingPeriodsProps {
-  periods: readonly GradingPeriod[];
-  summary: GradingPeriodsSummary;
-}
-
-export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
+export function GradingPeriods() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [yearFilter, setYearFilter] = useState<AcademicYearFilter>(
-    DEFAULT_ACADEMIC_YEAR_FILTER,
-  );
   const [isAddOpen, setIsAddOpen] = useState(false);
 
-  // The id stays set after closing so the modal keeps its content while it fades out.
-  const [editId, setEditId] = useState<string | null>(null);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  // `getCurrent` is a stable reference, so it can be passed directly.
+  const { data: semester, error, isLoading, reload } = useApiQuery(semesterService.getCurrent);
 
   // Derived during render: no extra state or effects.
-  const currentPeriod =
-    periods.find((period) => period.status === "current") ?? null;
-  const yearScoped =
-    yearFilter === "all"
-      ? periods
-      : periods.filter((period) => period.academicYear === yearFilter);
+  const periods = semester
+    ? [...semester.gradingPeriods].sort((a, b) => a.sequence - b.sequence)
+    : [];
+  const academicYear = semester
+    ? formatAcademicYear(semester.schoolYearFrom, semester.schoolYearTo)
+    : "";
   const query = searchQuery.trim().toLowerCase();
   const visiblePeriods =
     query === ""
-      ? yearScoped
-      : yearScoped.filter(
+      ? periods
+      : periods.filter(
           (period) =>
-            getPeriodName(period).toLowerCase().includes(query) ||
-            period.academicYear.toLowerCase().includes(query),
+            period.name.toLowerCase().includes(query) || period.chargeDueDate.includes(query),
         );
 
   const closeAddModal = () => setIsAddOpen(false);
-  // Persisting a new period needs a data source, which isn't decided yet.
+  // Placeholders until the POST and PUT endpoints are wired.
   const handleSavePeriod = () => closeAddModal();
-
-  const editPeriod = periods.find((period) => period.id === editId) ?? null;
-
-  const openEditModal = (period: GradingPeriod) => {
-    setEditId(period.id);
-    setIsEditOpen(true);
-  };
-  const closeEditModal = () => setIsEditOpen(false);
-
-  // Receives the id of the period that was edited.
-  const handleUpdate = (periodId: string, edits: NewGradingPeriodDraft) => {
-    // Persisting needs a data source, which isn't decided yet.
-    // This is where `periodId` and `edits` go to your update call.
-    console.log("Update grading period", periodId, edits);
-    closeEditModal();
+  const handleEdit = (_period: GradingPeriodRecord) => {
+    // TODO: open the edit modal for this period.
   };
 
   return (
@@ -76,13 +50,8 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary">
               Academic Schedule Governance
             </span>
-            <span
-              aria-hidden="true"
-              className="w-1 h-1 rounded-full bg-outline"
-            />
-            <span className="font-label-sm text-label-sm text-outline">
-              Institutional Configuration
-            </span>
+            <span aria-hidden="true" className="w-1 h-1 rounded-full bg-outline" />
+            <span className="font-label-sm text-label-sm text-outline">Institutional Configuration</span>
           </div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
             Grading Periods
@@ -101,47 +70,54 @@ export function GradingPeriods({ periods, summary }: GradingPeriodsProps) {
         </div>
       </div>
 
-      {currentPeriod && <CurrentPeriodBanner period={currentPeriod} />}
+      {error !== null && <ErrorAlert message={error} onRetry={reload} />}
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md">
-        <TermsStatCard
-          label="Configured Terms"
-          value={summary.configuredTerms}
-          badge={summary.coverageLabel}
-        />
-      </div>
+      {semester === undefined ? (
+        isLoading && (
+          <p role="status" className="font-body-md text-body-md text-on-surface-variant">
+            Loading current semester…
+          </p>
+        )
+      ) : (
+        <>
+          <CurrentPeriodBanner semester={semester} />
 
-      <div className="bg-surface-container-lowest rounded-xl shadow-xs flex flex-col overflow-hidden">
-        <PeriodToolbar
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          yearFilter={yearFilter}
-          onYearFilterChange={setYearFilter}
-        />
-        <div className="overflow-x-auto w-full">
-          <PeriodTable periods={visiblePeriods} onEdit={openEditModal} />
-          <EditGradingPeriodModal
-            isOpen={isEditOpen}
-            period={editPeriod}
-            onClose={closeEditModal}
-            onUpdate={handleUpdate}
-          />
-        </div>
-        <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
-          <div className="flex items-center gap-space-xs">
-            <Icon name="info" className="text-body-md text-outline" />
-            <p>
-              Showing {visiblePeriods.length} of {yearScoped.length} registered
-              grading windows
-              {yearFilter !== "all" && ` for ${yearFilter}`}
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+            <TermsStatCard label="Configured Terms" value={periods.length} badge={academicYear} />
           </div>
-        </div>
-      </div>
+
+          <div className="bg-surface-container-lowest rounded-xl shadow-xs flex flex-col overflow-hidden">
+            <PeriodToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+            <div
+              aria-busy={isLoading}
+              className={`overflow-x-auto w-full transition-opacity ${isLoading ? "opacity-60" : ""}`}
+            >
+              <PeriodTable
+                periods={visiblePeriods}
+                academicYear={academicYear}
+                emptyMessage={
+                  periods.length === 0
+                    ? "No grading periods configured yet."
+                    : "No grading periods match your search."
+                }
+                onEdit={handleEdit}
+              />
+            </div>
+            <div className="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm text-body-sm font-body-sm text-on-surface-variant">
+              <div className="flex items-center gap-space-xs">
+                <Icon name="info" className="text-body-md text-outline" />
+                <p>
+                  Showing {visiblePeriods.length} of {periods.length} registered grading windows
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <AddGradingPeriodModal
         isOpen={isAddOpen}
-        defaultAcademicYear={currentPeriod?.academicYear ?? ""}
+        defaultAcademicYear={academicYear}
         onClose={closeAddModal}
         onSave={handleSavePeriod}
       />
