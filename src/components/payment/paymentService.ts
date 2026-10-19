@@ -9,12 +9,22 @@ export const paymentService = {
     searchTerm: string,
     signal?: AbortSignal,
   ): Promise<PagedResult<PaymentRecord>> {
-    const { data } = await apiClient.get<PagedResult<PaymentRecord>>("/payments", {
-      params: {
-        page,
-        pageSize: PAGE_SIZE,
-        searchTerm: searchTerm || undefined,
+    const { data } = await apiClient.get<PagedResult<PaymentRecord>>(
+      "/payments",
+      {
+        params: {
+          page,
+          pageSize: PAGE_SIZE,
+          searchTerm: searchTerm || undefined,
+        },
+        signal,
       },
+    );
+    return data;
+  },
+
+  async getById(id: string, signal?: AbortSignal): Promise<PaymentRecord> {
+    const { data } = await apiClient.get<PaymentRecord>(`/payments/${id}`, {
       signal,
     });
     return data;

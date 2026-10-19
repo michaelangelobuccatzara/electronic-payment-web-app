@@ -25,20 +25,24 @@ export function Payments() {
   }
 
   const fetchPayments = useCallback(
-    (signal: AbortSignal) => paymentService.getPagination(currentPage, searchTerm, signal),
+    (signal: AbortSignal) =>
+      paymentService.getPagination(currentPage, searchTerm, signal),
     [currentPage, searchTerm],
   );
   const { data, error, isLoading, reload } = useApiQuery(fetchPayments);
 
-  const rangeStart = data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
-  const rangeEnd = data ? Math.min(data.page * data.pageSize, data.totalCount) : 0;
+  const rangeStart =
+    data && data.totalCount > 0 ? (data.page - 1) * data.pageSize + 1 : 0;
+  const rangeEnd = data
+    ? Math.min(data.page * data.pageSize, data.totalCount)
+    : 0;
 
-  // The record itself stays set after closing so the modal keeps its content while it fades out.
-  const [receiptPayment, setReceiptPayment] = useState<PaymentRecord | null>(null);
+  // The id stays set after closing so the modal keeps its content while it fades out.
+  const [receiptPaymentId, setReceiptPaymentId] = useState<string | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
 
   const handleViewReceipt = (payment: PaymentRecord) => {
-    setReceiptPayment(payment);
+    setReceiptPaymentId(payment.id);
     setIsReceiptOpen(true);
   };
 
@@ -55,7 +59,8 @@ export function Payments() {
             Payments
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant mt-0.5">
-            Track, verify, and reconcile school tuition and assessment payment transactions.
+            Track, verify, and reconcile school tuition and assessment payment
+            transactions.
           </p>
         </div>
         <div className="flex items-center gap-space-sm self-start md:self-auto">
@@ -79,7 +84,10 @@ export function Payments() {
         />
       </div>
 
-      <PaymentsToolbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <PaymentsToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
 
       {error !== null && (
         <div className="mb-space-md">
@@ -96,7 +104,10 @@ export function Payments() {
         >
           {data === undefined ? (
             isLoading && (
-              <p role="status" className="p-space-lg font-body-md text-body-md text-on-surface-variant">
+              <p
+                role="status"
+                className="p-space-lg font-body-md text-body-md text-on-surface-variant"
+              >
                 Loading payments…
               </p>
             )
@@ -104,7 +115,9 @@ export function Payments() {
             <PaymentsTable
               payments={data.items}
               emptyMessage={
-                searchTerm === "" ? "No payments yet." : "No payments match your search."
+                searchTerm === ""
+                  ? "No payments yet."
+                  : "No payments match your search."
               }
               onViewReceipt={handleViewReceipt}
             />
@@ -126,7 +139,7 @@ export function Payments() {
 
       <ReceiptModal
         isOpen={isReceiptOpen}
-        payment={receiptPayment}
+        paymentId={receiptPaymentId}
         onClose={() => setIsReceiptOpen(false)}
       />
     </div>
