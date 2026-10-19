@@ -295,3 +295,15 @@ export interface ApprovePromissory {
 export interface RejectPromissory {
   reasonOfRejection: string;
 }
+
+export interface PaymentRecord {
+  id: string;
+  paymentNumber: string;
+  studentName: string;
+  schoolId: string;
+  amount: number;
+  /** ISO 8601 UTC timestamp. */
+  paidAt: string;
+  /** e.g. ["Cash"] or ["Cash", "Credit"]. */
+  paymentMethod: string[];
+}

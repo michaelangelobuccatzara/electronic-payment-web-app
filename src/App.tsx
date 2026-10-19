@@ -12,10 +12,6 @@ import { StudentManagement } from "./pages/StudentManagement";
 import { GradingPeriods } from "./pages/GradingPeriods";
 import { PromissoryNotes } from "./pages/PromissoryNotes";
 import { Payments } from "./pages/Payments";
-import {
-  SAMPLE_PAYMENT_TRANSACTIONS,
-  SAMPLE_PAYMENTS_SUMMARY,
-} from "./data/paymentSample";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 
@@ -80,10 +76,7 @@ function App() {
                 path={ROUTE_PATHS.payments}
                 element={
                   <ProtectedRoute roles={["Admin", "Cashier"]}>
-                    <Payments
-                      transactions={SAMPLE_PAYMENT_TRANSACTIONS}
-                      summary={SAMPLE_PAYMENTS_SUMMARY}
-                    />
+                    <Payments />
                   </ProtectedRoute>
                 }
               />

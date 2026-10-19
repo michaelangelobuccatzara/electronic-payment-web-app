@@ -1,13 +1,10 @@
 import { useId } from "react";
-import {
-  PAYMENT_METHOD_LABELS,
-  PAYMENT_STATUS_META,
-} from "../../data/paymentOptions";
-import type { PaymentTransaction } from "../../types/types";
+import type { PaymentRecord } from "../../types/types";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { formatDateTime } from "../../utils/formatDateTime";
+import { formatPaymentMethods } from "../../utils/formatPaymentMethods";
 import { AnimatedModal } from "../ui/AnimatedModal";
 import { Icon } from "../ui/Icon";
-import { StatusBadge } from "../ui/StatusBadge";
 
 const OVERLAY_CLASS = "backdrop-blur-xs p-4 duration-200";
 const BOX_CLASS = "rounded-xl shadow-xl overflow-hidden duration-200";
@@ -15,11 +12,11 @@ const BOX_CLASS = "rounded-xl shadow-xl overflow-hidden duration-200";
 interface ReceiptModalProps {
   isOpen: boolean;
   /** Keep it set while the modal fades out, so the content doesn't blank mid-animation. */
-  transaction: PaymentTransaction | null;
+  payment: PaymentRecord | null;
   onClose: () => void;
 }
 
-export function ReceiptModal({ isOpen, transaction, onClose }: ReceiptModalProps) {
+export function ReceiptModal({ isOpen, payment, onClose }: ReceiptModalProps) {
   const titleId = useId();
 
   return (
@@ -31,7 +28,7 @@ export function ReceiptModal({ isOpen, transaction, onClose }: ReceiptModalProps
       overlayClassName={OVERLAY_CLASS}
       boxClassName={BOX_CLASS}
     >
-      {transaction && (
+      {payment && (
         <>
           <div className="p-space-lg bg-surface-container-low flex items-start justify-between">
             <div className="flex items-center gap-3">
@@ -56,57 +53,44 @@ export function ReceiptModal({ isOpen, transaction, onClose }: ReceiptModalProps
           </div>
 
           <div className="p-space-lg space-y-space-md">
-            <div className="flex items-center justify-between pb-3 border-b border-surface-container-low">
-              <div>
-                <span className="font-label-sm text-label-sm text-outline uppercase">
-                  Transaction Reference
-                </span>
-                <div className="font-data-tabular text-headline-md font-bold text-primary">
-                  {transaction.referenceNo}
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="font-label-sm text-label-sm text-outline uppercase">Status</span>
-                <div className="mt-0.5">
-                  <StatusBadge
-                    tone={PAYMENT_STATUS_META[transaction.status].tone}
-                    label={PAYMENT_STATUS_META[transaction.status].receiptLabel}
-                    size="md"
-                  />
-                </div>
+            <div className="pb-3 border-b border-surface-container-low">
+              <span className="font-label-sm text-label-sm text-outline uppercase">
+                Transaction Reference
+              </span>
+              <div className="font-data-tabular text-headline-md font-bold text-primary">
+                {payment.paymentNumber}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-space-sm bg-background p-space-md rounded-lg">
-              <div>
+              <div className="min-w-0">
                 <span className="font-label-sm text-label-sm text-outline uppercase">
                   Student Payor
                 </span>
-                <div className="font-body-md text-body-md font-semibold text-on-surface">
-                  {transaction.studentName}
+                <div className="font-body-md text-body-md font-semibold text-on-surface wrap-break-word">
+                  {payment.studentName}
                 </div>
                 <div className="font-data-tabular text-data-tabular text-outline">
-                  ID: {transaction.studentNumber}
+                  ID: {payment.schoolId}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <span className="font-label-sm text-label-sm text-outline uppercase">
                   Settlement Date
                 </span>
                 <div className="font-data-tabular text-data-tabular text-on-surface font-medium">
-                  {transaction.date} {transaction.time}
+                  {formatDateTime(payment.paidAt)}
                 </div>
-                <div className="font-label-sm text-label-sm text-outline truncate">
-                  {PAYMENT_METHOD_LABELS[transaction.method]}
+                <div className="font-label-sm text-label-sm text-outline wrap-break-word">
+                  {formatPaymentMethods(payment.paymentMethod)}
                 </div>
               </div>
             </div>
 
-            {/* Added: the source's receipt had no amount element. */}
             <div className="flex items-center justify-between">
               <span className="font-label-sm text-label-sm text-outline uppercase">Amount Paid</span>
               <span className="font-data-tabular text-headline-md font-bold text-on-surface">
-                {formatCurrency(transaction.amount)}
+                {formatCurrency(payment.amount)}
               </span>
             </div>
           </div>
@@ -119,7 +103,7 @@ export function ReceiptModal({ isOpen, transaction, onClose }: ReceiptModalProps
             >
               Dismiss
             </button>
-            {/* No behavior in the source (it only showed an alert). */}
+            {/* No behavior yet: there is no download endpoint. */}
             <button
               type="button"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-xs hover:bg-primary-container transition-colors"

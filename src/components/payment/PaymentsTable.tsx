@@ -1,17 +1,19 @@
-import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS_META } from "../../data/paymentOptions";
-import type { PaymentTransaction } from "../../types/types";
+import type { PaymentRecord } from "../../types/types";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { formatDateTime } from "../../utils/formatDateTime";
+import { formatPaymentMethods } from "../../utils/formatPaymentMethods";
 import { Icon } from "../ui/Icon";
 
 const CELL = "py-3 px-space-md";
 const HEADER_CELL = `${CELL} font-semibold`;
 
 interface PaymentsTableProps {
-  transactions: readonly PaymentTransaction[];
-  onViewReceipt: (transaction: PaymentTransaction) => void;
+  payments: readonly PaymentRecord[];
+  emptyMessage: string;
+  onViewReceipt: (payment: PaymentRecord) => void;
 }
 
-export function PaymentsTable({ transactions, onViewReceipt }: PaymentsTableProps) {
+export function PaymentsTable({ payments, emptyMessage, onViewReceipt }: PaymentsTableProps) {
   return (
     <table className="w-full text-left border-collapse">
       <caption className="sr-only">Payment transactions</caption>
@@ -27,71 +29,54 @@ export function PaymentsTable({ transactions, onViewReceipt }: PaymentsTableProp
         </tr>
       </thead>
       <tbody className="divide-y divide-surface-container-low font-body-md text-body-md text-on-surface">
-        {transactions.length === 0 ? (
+        {payments.length === 0 ? (
           <tr>
             <td colSpan={7} className={`${CELL} text-center text-on-surface-variant`}>
-              No payments match your filters.
+              {emptyMessage}
             </td>
           </tr>
         ) : (
-          transactions.map((transaction) => {
-            const status = PAYMENT_STATUS_META[transaction.status];
-            return (
-              <tr
-                key={transaction.referenceNo}
-                className="hover:bg-background/80 transition-colors"
-              >
-                <td className={CELL}>
-                  <span className="font-data-tabular text-data-tabular font-bold text-primary">
-                    {transaction.referenceNo}
-                  </span>
-                </td>
-                <td className={CELL}>
-                  <div className="font-semibold text-on-surface leading-snug">
-                    {transaction.studentName}
-                  </div>
-                </td>
-                <td className={CELL}>
-                  <span className="font-data-tabular text-data-tabular text-on-surface-variant">
-                    {transaction.studentNumber}
-                  </span>
-                </td>
-                <td className={`${CELL} text-right`}>
-                  <span className="font-data-tabular text-data-tabular font-bold text-on-surface">
-                    {formatCurrency(transaction.amount)}
-                  </span>
-                </td>
-                <td className={CELL}>
-                  <div className="font-data-tabular text-data-tabular text-on-surface leading-tight">
-                    {transaction.date}
-                  </div>
-                  <div className="font-label-sm text-label-sm text-outline">{transaction.time}</div>
-                </td>
-                <td className={CELL}>
-                  <div className="flex items-center gap-1.5">
-                    {/* The dot encodes the payment status, so screen readers get it as text. */}
-                    <span
-                      aria-hidden="true"
-                      className={`w-2 h-2 rounded-full ${status.dotClassName}`}
-                    />
-                    <span className="sr-only">{status.label} payment: </span>
-                    <span>{PAYMENT_METHOD_LABELS[transaction.method]}</span>
-                  </div>
-                </td>
-                <td className={`${CELL} text-right`}>
-                  <button
-                    type="button"
-                    onClick={() => onViewReceipt(transaction)}
-                    aria-label={`View receipt ${transaction.referenceNo}`}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 text-primary hover:bg-surface-container-low rounded-xs font-label-md text-label-md font-semibold transition-colors"
-                  >
-                    <Icon name="receipt" className="text-body-sm" />
-                    View Receipt
-                  </button>
-                </td>
-              </tr>
-            );
-          })
+          payments.map((payment) => (
+            <tr key={payment.id} className="hover:bg-background/80 transition-colors">
+              <td className={CELL}>
+                <span className="font-data-tabular text-data-tabular font-bold text-primary">
+                  {payment.paymentNumber}
+                </span>
+              </td>
+              <td className={CELL}>
+                <div className="font-semibold text-on-surface leading-snug">
+                  {payment.studentName}
+                </div>
+              </td>
+              <td className={CELL}>
+                <span className="font-data-tabular text-data-tabular text-on-surface-variant">
+                  {payment.schoolId}
+                </span>
+              </td>
+              <td className={`${CELL} text-right`}>
+                <span className="font-data-tabular text-data-tabular font-bold text-on-surface">
+                  {formatCurrency(payment.amount)}
+                </span>
+              </td>
+              <td className={CELL}>
+                <span className="font-data-tabular text-data-tabular text-on-surface">
+                  {formatDateTime(payment.paidAt)}
+                </span>
+              </td>
+              <td className={CELL}>{formatPaymentMethods(payment.paymentMethod)}</td>
+              <td className={`${CELL} text-right`}>
+                <button
+                  type="button"
+                  onClick={() => onViewReceipt(payment)}
+                  aria-label={`View receipt ${payment.paymentNumber}`}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-primary hover:bg-surface-container-low rounded-xs font-label-md text-label-md font-semibold transition-colors"
+                >
+                  <Icon name="receipt" className="text-body-sm" />
+                  View Receipt
+                </button>
+              </td>
+            </tr>
+          ))
         )}
       </tbody>
     </table>
