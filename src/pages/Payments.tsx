@@ -10,6 +10,8 @@ import { Pagination } from "../components/ui/Pagination";
 import { useApiQuery } from "../hooks/useApiQuery";
 import { useDebouncedValue } from "../hooks/useDebouncedValue";
 import type { PaymentRecord } from "../types/types";
+import { ExportPaymentsModal } from "../components/payment/ExportPaymentsModal";
+import { downloadBlob } from "../utils/downloadBlob";
 
 export function Payments() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +48,15 @@ export function Payments() {
     setIsReceiptOpen(true);
   };
 
+  const [isExportOpen, setIsExportOpen] = useState(false);
+
+  // Errors propagate to the modal, which displays them. Close only after the download starts.
+  const handleExport = async (dateFrom: string, dateTo: string) => {
+    const { blob, fileName } = await paymentService.exportCsv(dateFrom, dateTo);
+    downloadBlob(blob, fileName);
+    setIsExportOpen(false);
+  };
+
   return (
     <div className="flex flex-col w-full">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
@@ -64,9 +75,9 @@ export function Payments() {
           </p>
         </div>
         <div className="flex items-center gap-space-sm self-start md:self-auto">
-          {/* No behavior yet: there is no export endpoint. */}
           <button
             type="button"
+            onClick={() => setIsExportOpen(true)}
             className="inline-flex items-center gap-1.5 px-3 py-2 bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-lg shadow-xs hover:bg-surface-container-low transition-colors"
           >
             <Icon name="file_download" className="text-body-lg text-outline" />
@@ -141,6 +152,12 @@ export function Payments() {
         isOpen={isReceiptOpen}
         paymentId={receiptPaymentId}
         onClose={() => setIsReceiptOpen(false)}
+      />
+
+      <ExportPaymentsModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
+        onExport={handleExport}
       />
     </div>
   );
