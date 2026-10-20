@@ -94,7 +94,7 @@ export function StudentManagement() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
         <div className="flex flex-col">
           <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-            Registrar &amp; Bursar Database
+            Registrar &amp; Database
           </span>
           <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight mt-0.5">
             Student Management

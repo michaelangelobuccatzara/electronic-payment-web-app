@@ -62,7 +62,7 @@ export function Payments() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
         <div>
           <div className="flex items-center gap-space-xs text-outline font-label-sm text-label-sm uppercase tracking-wider mb-1">
-            <span>Bursary &amp; Accounting</span>
+            <span>Accounting</span>
             <span aria-hidden="true">/</span>
             <span className="text-primary font-semibold">Ledger Ingestion</span>
           </div>

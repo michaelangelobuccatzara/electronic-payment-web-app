@@ -32,7 +32,7 @@ export function AdminDashboard() {
             aria-hidden="true"
           />
           <span className="font-label-sm text-label-sm uppercase tracking-wider text-outline">
-            Bursar Operational Hub
+            Operational Hub
           </span>
         </div>
         <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight">

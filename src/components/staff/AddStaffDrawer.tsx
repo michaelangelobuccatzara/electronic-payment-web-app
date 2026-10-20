@@ -1,9 +1,9 @@
 import { useId, useState, type FormEvent, type ReactNode } from "react";
 import { STAFF_ROLE_OPTIONS, isStaffRole } from "../../data/staffOptions";
 import { useEscapeKey } from "../../hooks/useEscapeKey";
-import type { AddStaff, NewStaffDraft, StaffRole } from "../../types/types";
 import { Icon } from "../ui/Icon";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
+import type { AddStaff, StaffRole } from "../../types/types";
 
 const EDITABLE_INPUT =
   "h-10 bg-surface-container-lowest text-on-surface border border-outline-variant font-body-md text-body-md rounded-lg focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-xs";

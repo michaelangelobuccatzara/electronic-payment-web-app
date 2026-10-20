@@ -5,6 +5,7 @@ import { getInitials } from "../../utils/getInitials";
 import { Icon } from "../ui/Icon";
 import { formatFullName } from "../../utils/formatFullName";
 import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { ErrorAlert } from "../ui/ErrorAlert";
 
 interface RevokeAccessDialogProps {
   /** The person being revoked. `null` means the dialog is closed. */
@@ -29,9 +30,11 @@ export function RevokeAccessDialog({
     reset: resetError,
   } = useAsyncAction(onConfirm);
   const handleCancel = () => {
+    if (isPending) return;
     resetError();
     onCancel();
   };
+
   useEscapeKey(member !== null, handleCancel);
 
   if (member === null) return null;
@@ -85,22 +88,30 @@ export function RevokeAccessDialog({
           </div>
         </div>
 
+        {error !== null && (
+          <div className="mx-space-lg mb-space-md">
+            <ErrorAlert message={error} />
+          </div>
+        )}
+
         <div className="p-space-md bg-surface-container-low border-t border-outline-variant flex items-center justify-end gap-space-sm">
           <button
             type="button"
             autoFocus
             onClick={handleCancel}
-            className="h-9 px-4 rounded-lg bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors"
+            disabled={isPending}
+            className="h-9 px-4 rounded-lg bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container font-label-md text-label-md font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => void confirm()}
-            className="h-9 px-4 rounded-lg bg-error text-on-error hover:bg-on-error-container font-label-md text-label-md font-semibold shadow-xs transition-colors flex items-center gap-1"
+            disabled={isPending}
+            className="h-9 px-4 rounded-lg bg-error text-on-error hover:bg-on-error-container font-label-md text-label-md font-semibold shadow-xs transition-colors flex items-center gap-1 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icon name="person_remove" className="text-body-md" />
-            <span>Revoke Access</span>
+            <span>{isPending ? "Revoking…" : "Revoke Access"}</span>
           </button>
         </div>
       </div>
