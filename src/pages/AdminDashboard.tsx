@@ -9,17 +9,26 @@ import { useAuth } from "../auth/useAuth";
 import { dashboardService } from "../components/dashboard/dashboardService";
 import { ErrorAlert } from "../components/ui/ErrorAlert";
 import { useApiQuery } from "../hooks/useApiQuery";
+import { formatCurrency } from "../utils/formatCurrency";
 
 export function AdminDashboard() {
   const { user } = useAuth();
   // `getSummary` is a stable reference, so it can be passed directly.
-  const { data: summary, error, isLoading, reload } = useApiQuery(dashboardService.getSummary);
+  const {
+    data: summary,
+    error,
+    isLoading,
+    reload,
+  } = useApiQuery(dashboardService.getSummary);
 
   if (summary === undefined) {
     return isLoading ? (
       <p role="status">Loading…</p>
     ) : (
-      <ErrorAlert message={error ?? "Unable to load the dashboard."} onRetry={reload} />
+      <ErrorAlert
+        message={error ?? "Unable to load the dashboard."}
+        onRetry={reload}
+      />
     );
   }
 
@@ -69,7 +78,7 @@ export function AdminDashboard() {
         />
         <StatCard
           label="Payments Collected"
-          value={`${summary?.totalPaymentCollected}`}
+          value={formatCurrency(summary.totalPaymentCollected)}
           caption="This semester"
           valueTone="primary"
           accessory={
