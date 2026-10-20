@@ -4,6 +4,7 @@ import type {
   PagedResult,
   PromissoryRecord,
   RejectPromissory,
+  SubmitPromissory,
 } from "../../types/types";
 
 const PAGE_SIZE = 10;
@@ -43,4 +44,8 @@ export const promissoryService = {
   async reject(id: string, request: RejectPromissory): Promise<void> {
     await apiClient.post(`/promissories/${id}/reject`, request);
   },
+
+  async submit(request: SubmitPromissory): Promise<void> {
+  await apiClient.post("/promissories/submit", request);
+},
 };

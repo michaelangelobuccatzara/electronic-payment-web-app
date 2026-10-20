@@ -11,6 +11,7 @@ import { Payments } from "./pages/Payments";
 import { ProtectedRoute } from "./auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 import { NAV_ITEMS, ROUTE_PATHS, ROUTE_ROLES } from "./data/navigation";
+import { PromissorySubmission } from "./pages/PromissorySubmission";
 
 function App() {
   return (
@@ -50,7 +51,9 @@ function App() {
               <Route
                 path={ROUTE_PATHS.gradingPeriods}
                 element={
-                  <ProtectedRoute roles={ROUTE_ROLES[ROUTE_PATHS.gradingPeriods]}>
+                  <ProtectedRoute
+                    roles={ROUTE_ROLES[ROUTE_PATHS.gradingPeriods]}
+                  >
                     <GradingPeriods />
                   </ProtectedRoute>
                 }
@@ -58,7 +61,9 @@ function App() {
               <Route
                 path={ROUTE_PATHS.promissoryNotes}
                 element={
-                  <ProtectedRoute roles={ROUTE_ROLES[ROUTE_PATHS.promissoryNotes]}>
+                  <ProtectedRoute
+                    roles={ROUTE_ROLES[ROUTE_PATHS.promissoryNotes]}
+                  >
                     <PromissoryNotes />
                   </ProtectedRoute>
                 }
@@ -68,6 +73,16 @@ function App() {
                 element={
                   <ProtectedRoute roles={ROUTE_ROLES[ROUTE_PATHS.payments]}>
                     <Payments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path={ROUTE_PATHS.promissorySubmission}
+                element={
+                  <ProtectedRoute
+                    roles={ROUTE_ROLES[ROUTE_PATHS.promissorySubmission]}
+                  >
+                    <PromissorySubmission />
                   </ProtectedRoute>
                 }
               />

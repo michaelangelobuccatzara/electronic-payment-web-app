@@ -285,3 +285,7 @@ export interface PaymentRecord {
   /** e.g. ["Cash"] or ["Cash", "Credit"]. */
   paymentMethod: string[];
 }
+
+export interface SubmitPromissory {
+  note: string;
+}
