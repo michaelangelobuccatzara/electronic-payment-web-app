@@ -9,13 +9,9 @@ import { useAuth } from "../../auth/useAuth";
 interface AdminLayoutProps {
   navItems: readonly NavItem[];
   user: UserProfile;
-  academicCycleLabel: string;
 }
 
-export function AdminLayout({
-  navItems,
-  academicCycleLabel,
-}: AdminLayoutProps) {
+export function AdminLayout({ navItems }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -47,11 +43,9 @@ export function AdminLayout({
     <>
       <Sidebar
         items={navItems}
-        academicCycleLabel={academicCycleLabel}
         isOpen={isSidebarOpen}
         onItemClick={() => setIsSidebarOpen(false)}
       />
-
       <div className="lg:pl-64">
         <TopNavBar
           sectionLabel={sectionLabel}

@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import type { NavItem } from "../../data/navigation";
 import { Icon } from "../ui/Icon";
-import { StatusBadge } from "../ui/StatusBadge";
+import { AcademicCycleCard } from "./AcademicCycleCard";
 
 // External asset from the Stitch export. Consider replacing with a local file.
 const LOGO_URL =
@@ -16,19 +16,13 @@ const LINK_INACTIVE_CLASSES =
 
 interface SidebarProps {
   items: readonly NavItem[];
-  academicCycleLabel: string;
   /** Only affects viewports below `lg`; on desktop the sidebar is always visible. */
   isOpen: boolean;
   /** Called when a nav link is clicked, so the mobile drawer can close. */
   onItemClick: () => void;
 }
 
-export function Sidebar({
-  items,
-  academicCycleLabel,
-  isOpen,
-  onItemClick,
-}: SidebarProps) {
+export function Sidebar({ items, isOpen, onItemClick }: SidebarProps) {
   return (
     <aside
       id="admin-sidebar"
@@ -59,7 +53,10 @@ export function Sidebar({
           </span>
         </div>
 
-        <nav aria-label="Primary" className="flex flex-col gap-space-xs px-space-sm">
+        <nav
+          aria-label="Primary"
+          className="flex flex-col gap-space-xs px-space-sm"
+        >
           {items.map((item) => (
             <NavLink
               key={item.path}
@@ -79,20 +76,7 @@ export function Sidebar({
       </div>
 
       <div className="p-space-md border-t border-outline-variant bg-surface-container-low">
-        <div className="bg-surface-container-lowest p-space-sm rounded-lg border border-outline-variant flex flex-col gap-space-xs">
-          <div className="flex items-center justify-between">
-            <span className="font-label-sm text-label-sm uppercase tracking-wide text-on-surface-variant">
-              Academic Cycle
-            </span>
-            <StatusBadge tone="success" label="Active" />
-          </div>
-          <span className="font-body-sm text-body-sm font-semibold text-on-surface">
-            {academicCycleLabel}
-          </span>
-          <span className="font-label-sm text-label-sm text-outline">
-            Bursar Operational Window
-          </span>
-        </div>
+        <AcademicCycleCard />
       </div>
     </aside>
   );

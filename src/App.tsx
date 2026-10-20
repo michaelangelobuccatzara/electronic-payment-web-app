@@ -4,10 +4,7 @@ import { AdminLayout } from "./components/layout/AdminLayout";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { StaffManagement } from "./pages/StaffManagement";
 import { NAV_ITEMS, ROUTE_PATHS } from "./data/navigation";
-import {
-  SAMPLE_ACADEMIC_CYCLE_LABEL,
-  SAMPLE_USER,
-} from "./data/dashboardSample";
+import { SAMPLE_USER } from "./data/dashboardSample";
 import { StudentManagement } from "./pages/StudentManagement";
 import { GradingPeriods } from "./pages/GradingPeriods";
 import { PromissoryNotes } from "./pages/PromissoryNotes";
@@ -24,13 +21,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
             <Route
-              element={
-                <AdminLayout
-                  navItems={NAV_ITEMS}
-                  user={SAMPLE_USER}
-                  academicCycleLabel={SAMPLE_ACADEMIC_CYCLE_LABEL}
-                />
-              }
+              element={<AdminLayout navItems={NAV_ITEMS} user={SAMPLE_USER} />}
             >
               <Route
                 path={ROUTE_PATHS.dashboard}
