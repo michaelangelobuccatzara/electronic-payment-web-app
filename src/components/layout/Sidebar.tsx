@@ -2,10 +2,7 @@ import { NavLink } from "react-router-dom";
 import type { NavItem } from "../../data/navigation";
 import { Icon } from "../ui/Icon";
 import { AcademicCycleCard } from "./AcademicCycleCard";
-
-// External asset from the Stitch export. Consider replacing with a local file.
-const LOGO_URL =
-  "https://lh3.googleusercontent.com/aida/AEtjO1We0JsHN99A_BKjIcLkDLZRyPVuC46f3G7QqeZ6VDKYWnIiNBvcXaH39lfrKsDT3BWQW5VWiMjs_z5GNJmtvXckr7LlWI67whmac_wOavwKYbsTiGjVGP5UNPjhHz6mk_eMyPnYea8MWq8eaoMoaB3L01Q-4pmCXn8VQ1AbE4gKTtM2QLzjZu4gwzFgBGggH1T8Err4hglphJH7PGgcGuowbogYekRHAv8csnaD8oJloKS97Fyo2fETgNY";
+import LOGO_URL from "../../assets/ndtc_logo.png";
 
 const LINK_BASE_CLASSES =
   "flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors";
@@ -34,7 +31,7 @@ export function Sidebar({ items, isOpen, onItemClick }: SidebarProps) {
         <div className="h-16 px-space-lg flex items-center gap-space-sm border-b border-outline-variant bg-surface-container-lowest">
           <img
             alt="School Administration Logo"
-            className="h-8 w-auto object-contain"
+            className="h-10 w-auto object-contain"
             src={LOGO_URL}
           />
           <div className="flex flex-col min-w-0">

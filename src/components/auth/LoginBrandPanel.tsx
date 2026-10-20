@@ -1,5 +1,4 @@
-const LOGO_URL =
-  "https://lh3.googleusercontent.com/aida/AEtjO1We0JsHN99A_BKjIcLkDLZRyPVuC46f3G7QqeZ6VDKYWnIiNBvcXaH39lfrKsDT3BWQW5VWiMjs_z5GNJmtvXckr7LlWI67whmac_wOavwKYbsTiGjVGP5UNPjhHz6mk_eMyPnYea8MWq8eaoMoaB3L01Q-4pmCXn8VQ1AbE4gKTtM2QLzjZu4gwzFgBGggH1T8Err4hglphJH7PGgcGuowbogYekRHAv8csnaD8oJloKS97Fyo2fETgNY";
+import LOGO from "../../assets/ndtc_logo.png";
 
 export function LoginBrandPanel() {
   return (
@@ -14,7 +13,7 @@ export function LoginBrandPanel() {
         <div className="mb-space-lg flex items-center gap-space-sm">
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-container-lowest p-1 shadow-md">
             <img
-              src={LOGO_URL}
+              src={LOGO}
               alt="School Administration Logo"
               className="h-full w-full object-contain"
             />
