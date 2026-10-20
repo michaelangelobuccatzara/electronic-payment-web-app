@@ -5,7 +5,6 @@ import { tokenStore } from "./tokenStore";
 import { authService } from "./authService";
 import { apiClient } from "../api/axiosInstrance";
 import { setupInterceptors } from "../api/interceptors";
-import { PUBLIC_ROUTES } from "../utils/publicRoutes";
 import type { LoginCredentials } from "../types/types";
 
 const INITIAL_STATE: AuthState = {
@@ -39,10 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    const isPublic = PUBLIC_ROUTES.some((path) =>
-      window.location.pathname.startsWith(path),
-    );
-
+    // Runs on every page, /login included. Otherwise a reload on /login can't tell the
+    // user is already signed in. With no session it fails quickly and the form shows.
     async function silentRefresh() {
       try {
         const token = await authService.refresh();
@@ -50,22 +47,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         tokenStore.set(token);
         const user = await authService.Me();
-        setState({
-          user,
-          token: token,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+        if (cancelled) return;
+
+        setState({ user, token, isAuthenticated: true, isLoading: false });
       } catch {
         if (!cancelled) {
           setState((s) => ({ ...s, isLoading: false }));
         }
       }
-    }
-
-    if (isPublic) {
-      setState((s) => ({ ...s, isLoading: false }));
-      return;
     }
 
     silentRefresh();

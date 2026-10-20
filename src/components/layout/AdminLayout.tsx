@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import type { NavItem } from "../../data/navigation";
 import type { UserProfile } from "../../types/types";
 import { Sidebar } from "./Sidebar";
 import { TopNavBar } from "./TopNavBar";
 import { useAuth } from "../../auth/useAuth";
+import { hasAnyRole } from "../../auth/roles";
+import { ROUTE_ROLES, type NavItem } from "../../data/navigation";
 
 interface AdminLayoutProps {
   navItems: readonly NavItem[];
@@ -17,7 +18,12 @@ export function AdminLayout({ navItems }: AdminLayoutProps) {
 
   const navigate = useNavigate();
 
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  // Only show the pages this user's roles may open.
+const visibleNavItems = navItems.filter((item) =>
+  hasAnyRole(user?.roles, ROUTE_ROLES[item.path]),
+);
 
   const handleLogout = async () => {
     await logout(); // calls the API (errors swallowed inside), then clears local state
@@ -42,7 +48,7 @@ export function AdminLayout({ navItems }: AdminLayoutProps) {
   return (
     <>
       <Sidebar
-        items={navItems}
+        items={visibleNavItems}
         isOpen={isSidebarOpen}
         onItemClick={() => setIsSidebarOpen(false)}
       />

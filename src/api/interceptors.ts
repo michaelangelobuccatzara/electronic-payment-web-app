@@ -25,14 +25,14 @@ export function setupInterceptors(
     async (error) => {
       const originalConfig = error.config as RetryableConfig;
 
-      const AUTH_ENDPOINTS = ["/users/authenticate", "/users/tokens/refresh"];
+      // Auth calls themselves must never trigger a refresh: a failed refresh would wait on itself.
+      const isAuthCall = originalConfig.url?.startsWith("/auth") ?? false;
+
       if (
         error.response?.status !== 401 ||
         originalConfig._retry ||
-        AUTH_ENDPOINTS.some((url) => originalConfig.url?.includes(url)) ||
-        PUBLIC_ROUTES.some((path) =>
-          window.location.pathname.startsWith(path),
-        )
+        isAuthCall ||
+        PUBLIC_ROUTES.some((path) => window.location.pathname.startsWith(path))
       ) {
         return Promise.reject(error);
       }
